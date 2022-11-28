@@ -43,7 +43,12 @@ app.post('/', (req, res) => {
         author: req.body.author,
         ingredients: req.body.ingredients,
         instructions: req.body.instructions,
-        notes: req.body.notes
+        cuisine: req.body.quisine,
+        notes: req.body.notes,
+        tags: req.body.tags,
+        time: req.body.time,
+        skill: req.body.skill,
+        restrictions: req.body.restrictions
     })
     mongoose.connect(uri)
     newRecipe.save()

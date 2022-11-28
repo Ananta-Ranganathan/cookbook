@@ -56,7 +56,7 @@ function AddRecipe () {
       skill: interpretSkill(),
       restrictions: interpretRestrictions(),
     };
-    fetch("http://localhost:8000/", {
+    fetch("http://localhost:8000/", { // need to rename to actual endpoint later
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

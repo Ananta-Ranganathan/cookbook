@@ -22,7 +22,7 @@ function Veggie() {
 		else {
 			const api = await fetch(
 				'https://api.spoonacular.com/recipes/random?apiKey=860072773b074da38c79004d91bbdf00&number=9'
-			);
+			); // replace with GET veggie recipes from db
 			const data = await api.json();
 
 			localStorage.setItem('veggie', JSON.stringify(data.recipes));

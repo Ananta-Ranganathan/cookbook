@@ -56,9 +56,14 @@ function AddRecipe () {
       skill: interpretSkill(),
       restrictions: interpretRestrictions(),
     };
-
-    console.log(recipedata);
-  };
+    fetch("http://localhost:8000/", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(recipedata)
+    }).then(console.log(recipedata));
+  }
 
   return (
     <StyledField>

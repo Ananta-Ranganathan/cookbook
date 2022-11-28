@@ -4,7 +4,7 @@ import { Splide, SplideSlide } from "@splidejs/react-splide";
 import '@splidejs/react-splide/css';
 import { Link } from "react-router-dom";
 
-function Popular() {
+function Popular() { // REPLACE WITH RECOMMENDED
 
 	const [popular, setPopular] = useState([]);
 
@@ -22,7 +22,7 @@ function Popular() {
 		else {
 			const api = await fetch(
 				'https://api.spoonacular.com/recipes/random?apiKey=860072773b074da38c79004d91bbdf00&number=9'
-			);
+			); // REPLACE WITH GET FROM DB?
 			const data = await api.json();
 
 			localStorage.setItem('popular', JSON.stringify(data.recipes));

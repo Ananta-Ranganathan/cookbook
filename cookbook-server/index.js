@@ -43,7 +43,7 @@ app.post('/', (req, res) => {
         author: req.body.author,
         ingredients: req.body.ingredients,
         instructions: req.body.instructions,
-        cuisine: req.body.quisine,
+        cuisine: req.body.cuisine,
         notes: req.body.notes,
         tags: req.body.tags,
         time: req.body.time,
@@ -67,7 +67,8 @@ const recipeSchema = new mongoose.Schema({
     time: { low: Number, high: Number },
     skill: { easy: Boolean, medium: Boolean, hard: Boolean},
     restrictions: { vegetarian: Boolean, gluten_free: Boolean, dairy_free: Boolean},
-    notes: [String]
+    notes: [String],
+    tags: [String]
 });
 
 const userSchema = new mongoose.Schema({

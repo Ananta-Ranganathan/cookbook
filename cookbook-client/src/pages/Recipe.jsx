@@ -11,10 +11,12 @@ function Recipe() {
   const [activeTab, setActiveTab] = useState("instructions");
 
   const fetchDetails = async () => {
+    //console.log(params.name)
     const data = await fetch(
-      'https://api.spoonacular.com/recipes/' + params.name + 
-      '/information/?apiKey=860072773b074da38c79004d91bbdf00'
-    );
+      'http://localhost:8000/recipes/' + params.name, {
+        method: 'GET',
+      }
+    ); // REPLACE WITH GET FROM DB
     const detailData = await data.json();
     setDetails(detailData);
     console.log(detailData);
@@ -27,8 +29,7 @@ function Recipe() {
   return (
     <DetailWrapper>
       <div>
-        <h2>{details.title}</h2>
-        <img src={details.image} alt="" />
+        <h2>{details.name}</h2>
       </div>
       <Info>
         <Button 
@@ -42,17 +43,16 @@ function Recipe() {
           onClick={() => setActiveTab('ingredients')}
         >
           Ingredients
-        </Button>
+          </Button>
         {activeTab === 'instructions' && (
           <div>
-            <h3 dangerouslySetInnerHTML={{__html: details.summary}}></h3>
             <h3 dangerouslySetInnerHTML={{__html: details.instructions}}></h3>
           </div>
         )}
-        {activeTab == 'ingredients' && (
+        {activeTab === 'ingredients' && (
           <ul>
-            {details.extendedIngredients.map((ingredient) => (
-              <li key={ingredient.id}>{ingredient.original}</li>
+            {details.ingredients.map((ingredient, i) => (
+              <li key={i}>{ingredient}</li>
             ))}
           </ul>
         )}

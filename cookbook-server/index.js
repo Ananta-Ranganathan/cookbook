@@ -22,23 +22,30 @@ const port = process.env.PORT || 8000
 
 
 app.get('/', (req, res) => {
-    res.send('default response from cookbook server');
+    res.send('cookbook server');
 })
 
+// app.get('/recipes/category/:cat'. (req, res) => {
+//     console.log("getting " + req.params.cat)
+// }) 
+
 app.get('/recipes/:id', (req, res) => {
-    MongoClient.connect(uri, function(err, db) {
-        let id = req.params.id
-        if (err) throw err
-        var dbo = db.db("test")
-        res.json(dbo.collection("recipes").find({"_id": id}))
-        db.close()
+    console.log("getting " + req.params.id)
+    const Recipe = mongoose.model('Recipe', recipeSchema)   
+    mongoose.connect(uri)
+    Recipe.findById(mongoose.Types.ObjectId(req.params.id), (err, recipe) => {
+        if (err) console.log(err)
+        else {
+            console.log(recipe)
+            res.json(recipe)
+        }
     })
 })
 
 app.post('/', (req, res) => {
     console.log(req.body)
-    const recipe = mongoose.model('Recipe', recipeSchema)
-    const newRecipe = new recipe({
+    const Recipe = mongoose.model('Recipe', recipeSchema)
+    const newRecipe = new Recipe({
         name: req.body.name,
         author: req.body.author,
         ingredients: req.body.ingredients,

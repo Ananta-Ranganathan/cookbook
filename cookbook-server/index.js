@@ -123,11 +123,14 @@ app.get('/user/:username/searchrecipes/:query', (req, res) => {
         const recipes = db.db("test").collection("recipes")
         recipes.find({$text: {$search: req.params.query}}).forEach((item) => res.send(item))
         const users = db.db("test").collection("users")
+        var items = []
         users.findOne({"username": req.params.username}, (err, user) => {
             for (const recipe of user.customRecipes) {
                 // might have to manually check each field to find matches for query
-                console.log(recipe)
+                items.push(recipe)
             }
+        }).then(() => {
+            res.send(items)
         })
         // figure out how to search over the non text fields (maybe manually do it for each document? sounds suboptimal but may be necessary)
     })

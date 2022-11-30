@@ -1,7 +1,6 @@
 import { React, useState, Component, useEffect } from "react";
 import styled from 'styled-components';
 
-
 function AddRecipe () {
   const [addName, setName] = useState("");
   const [addAuthor, setAuthor] = useState("");
@@ -47,7 +46,7 @@ function AddRecipe () {
     const recipedata = {
       name: addName,
       author: addAuthor,
-      ingredients: addIngredients.split(',').map(elements => elements.trim()),
+      ingredients: addIngredients.split('\n').map(elements => elements.trim()),
       instructions: addInstructions.split('\n').map(elements => elements.trim()),
       cuisine: addCuisine.split(',').map(elements => elements.trim()),
       notes: addNotes.split('\n').map(elements => elements.trim()),
@@ -69,7 +68,7 @@ function AddRecipe () {
     <StyledField>
       <h4>ADD RECIPE INFORMATION</h4>
       <ColoredLine color="black" />
-      <h3>Please note all fields marked with a * are mandatory</h3>
+      <h2>Please note all fields marked with a * are mandatory</h2>
       <input  type="text" name="name"
         placeholder="Recipe Name*"
         value={addName}
@@ -80,15 +79,15 @@ function AddRecipe () {
         value={addAuthor}
         onChange={(e) => setAuthor(e.target.value)}
       />
-      <input type="text" name="ingredients"
-        placeholder="Ingredients - separate with commas*"
-        value={addIngredients}
-        onChange={(e) => setIngredients(e.target.value)}
-      />
       <input type="text" name="cuisine"
         placeholder="Cuisine type (ex: Japanese, Korean) - separate with commas*"
         value={addCuisine}
         onChange={(e) => setCuisine(e.target.value)}
+      />
+      <textarea type="text" name="ingredients"
+        placeholder="Ingredients - separate with commas*"
+        value={addIngredients}
+        onChange={(e) => setIngredients(e.target.value)}
       />
       <textarea type="text" name="instructions"
         placeholder="Instructions (please separate with a newline character)*"
@@ -115,7 +114,7 @@ function AddRecipe () {
         onChange={(e) => setMaxTime(e.target.value)}
       />
 
-      <h3>Recipe Skill Level:</h3>
+      <h2>Recipe Skill Level:</h2>
       <div onChange={handleSkill}>
         <input type="radio" name="skill" value="easy" id="easy" defaultChecked={addSkill === "easy"} />
         <label htmlFor="easy">Easy</label>
@@ -125,7 +124,7 @@ function AddRecipe () {
         <label htmlFor="hard">Hard</label>
       </div>
 
-      <h3>Dietary Restrictions:</h3>
+      <h2>Dietary Restrictions:</h2>
       <input type="checkbox" name="vegetarian"
         checked={addVegetarian}
         onChange={(e) => setVegetarian(e.target.checked)}

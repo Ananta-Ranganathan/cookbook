@@ -73,7 +73,6 @@ app.get('/user/:username/password/:password', (req, res) => {
     console.log("finding user " + req.params.username + " with password attempt " + req.params.password)
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
-    const user = User.findOne({'username': req.params.username})
     User.findOne({'username': req.params.username}, (err, user) => {
         if (user) {
             res.send(user.password === req.params.password)
@@ -104,13 +103,29 @@ app.get('/createuser/:username/password/:password', (req, res) => {
 // SEARCH
 
 app.get('/searchrecipes/:query', (req, res) => {
-    // search all the recipes for instance of text query
-    // return name for link and objectid for ref
+    MongoClient.connect(uri, (err, db) => {
+        const recipes = db.db("test").collection("recipes")
+        recipes.find({$text: {$search: req.params.query}}).forEach((item) => res.send(item))
+        // figure out how to search over the non text fields
+    })
 })
 
 app.get('/user/:username/searchrecipes/:query', (req, res) => {
     // search all the recipes (including user custom ones) for instance of text query
     // return name for link, objectid for ref, and whether or not it is user specific
+    MongoClient.connect(uri, (err, db) => {
+        const recipes = db.db("test").collection("recipes")
+        recipes.find({$text: {$search: req.params.query}}).forEach((item) => res.send(item))
+        const users = db.db("test").collection("users")
+        users.findOne({"username": req.params.username}, (err, user) => {
+            for (const recipe of user.customRecipes) {
+                // might have to manually check each field to find matches for query
+                console.log(recipe)
+            }
+        })
+
+        // figure out how to search over the non text fields (maybe manually do it for each document? sounds suboptimal but may be necessary)
+    })
 })
 
 // RECOMMENDATION

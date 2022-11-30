@@ -123,7 +123,6 @@ app.get('/user/:username/searchrecipes/:query', (req, res) => {
                 console.log(recipe)
             }
         })
-
         // figure out how to search over the non text fields (maybe manually do it for each document? sounds suboptimal but may be necessary)
     })
 })

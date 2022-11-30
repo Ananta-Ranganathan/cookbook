@@ -44,26 +44,27 @@ app.get('/user/:username/recipes/:id', (req, res) => {
     console.log(`finding user ${req.params.username} custom version of ${req.params.recipename}`)
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
-    const user = User.findOne({'username': req.params.username})
-    let found = false
-    for (const recipe of user.customRecipes) {
-        if (recipe._id === mongoose.Types.ObjectId(req.params.id)) {
-            res.json(recipe)
-            found = true
-            // update internal scores for rec engine
-        }
-    }
-    if (!found) {
-        const Recipe = mongoose.model('Recipe', recipeSchema)   
-        mongoose.connect(uri)
-        Recipe.findById(mongoose.Types.ObjectId(req.params.id), (err, recipe) => {
-            if (err) console.log(err)
-            else {
-                console.log(recipe)
+    const user = User.findOne({'username': req.params.username}, (err, user) => {
+        let found = false
+        for (const recipe of user.customRecipes) {
+            if (recipe._id === mongoose.Types.ObjectId(req.params.id)) {
                 res.json(recipe)
+                found = true
+                // update internal scores for rec engine
             }
-        })
-    }
+        }
+        if (!found) {
+            const Recipe = mongoose.model('Recipe', recipeSchema)   
+            mongoose.connect(uri)
+            Recipe.findById(mongoose.Types.ObjectId(req.params.id), (err, recipe) => {
+                if (err) console.log(err)
+                else {
+                    console.log(recipe)
+                    res.json(recipe)
+                }
+            })
+        }
+    })
 })
 
 // LOGIN
@@ -73,28 +74,31 @@ app.get('/user/:username/password/:password', (req, res) => {
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
     const user = User.findOne({'username': req.params.username})
-    if (user) {
-        res.send(user.password === req.params.password)
-    } else {
-        res.send(false)
-    }
+    User.findOne({'username': req.params.username}, (err, user) => {
+        if (user) {
+            res.send(user.password === req.params.password)
+        } else {
+            res.send(false)
+        }
+    })
 })
 
 app.get('/createuser/:username/password/:password', (req, res) => {
     console.log("creating user " + req.params.username + " with password " + req.params.password)
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
-    const user = User.findOne({'username': req.params.username})
-    if (user) {
-        res.send(false)
-    } else {
-        const newUser = new User({
-            username: req.params.username,
-            password: req.params.password,
-        })
-        newUser.save()
-        res.send(true)
-    }
+    User.findOne({'username': req.params.username}, (err, user) => {
+        if (user) {
+            res.send(false)
+        } else {
+            const newUser = new User({
+                username: req.params.username,
+                password: req.params.password,
+            })
+            newUser.save()
+            res.send(true)
+        }
+    })
 })
 
 // SEARCH

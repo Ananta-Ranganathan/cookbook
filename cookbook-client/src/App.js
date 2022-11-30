@@ -11,25 +11,76 @@ import {BrowserRouter, Link} from 'react-router-dom';
 import Search from "./components/Search"
 import styled from "styled-components";
 import { GiKnifeFork } from "react-icons/gi";
+import Home from "./pages/Home";
+import { LoginContext, useLoginContext, LoginContextProvider } from "./LoginContext";
+import { useContext } from "react";
 
 function App() {
+
+  let login = useContext(LoginContext);
+
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Nav>
-          <GiKnifeFork/>
-          <Logo to={'/'}>Cookbook</Logo>
-        </Nav>
-        <Nav>
-          <AddButton to={'/addrecipe/'}>Create Recipe</AddButton>
-          <AddButton to={'/login/'}>Login</AddButton>
-        </Nav>
-        <Search />
-        <Category />
-        <Pages />
-      </BrowserRouter>
-    </div>
-  );
+    <LoginContextProvider>
+      <div>
+        <Home />
+      </div>
+    </LoginContextProvider>
+  )
+  /*
+  if (login.username === "") {
+    return (
+      <div className="App">
+        <BrowserRouter>
+          <Nav>
+            <GiKnifeFork/>
+            <Logo to={'/'}>Cookbook</Logo>
+          </Nav>
+          <Nav>
+            <Wrapper>
+              <AddButton to={'/addrecipe/'}>Create Recipe</AddButton>
+            </Wrapper>
+            <Wrapper>
+              <AddButton to={'/login/'}>Login</AddButton>
+            </Wrapper>
+            <Wrapper>
+              <AddButton to={'/createuser/'}>Create User</AddButton>
+            </Wrapper>
+          </Nav>
+          <Search />
+          <Category />
+          <Pages />
+        </BrowserRouter>
+      </div>
+    );
+  }
+  else {
+    return (
+      <div className="App">
+        <BrowserRouter>
+          <Nav>
+            <GiKnifeFork/>
+            <Logo to={'/'}>Cookbook</Logo>
+          </Nav>
+          <h3>Welcome, {localStorage.username}!</h3>
+          <Nav>
+            <Wrapper>
+              <AddButton to={'/addrecipe/'}>Create Recipe</AddButton>
+            </Wrapper>
+            <Wrapper>
+              <AddButton to={'/login/'}>SHUMPY</AddButton>
+            </Wrapper>
+            <Wrapper>
+              <AddButton to={'/createuser/'}>Create User</AddButton>
+            </Wrapper>
+          </Nav>
+          <Search />
+          <Category />
+          <Pages />
+        </BrowserRouter>
+      </div>
+    );
+  }
+  */
 }
 
 const Logo = styled(Link)`
@@ -65,6 +116,13 @@ const Nav = styled.div`
   svg {
     font-size: 2rem;
   }
+`;
+
+const Wrapper = styled.div`
+	margin: 1rem 1rem;
+  justify-content: center;
+  display: flex;
+  width: 33%
 `;
 
 export default App;

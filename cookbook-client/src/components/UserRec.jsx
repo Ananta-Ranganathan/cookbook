@@ -4,54 +4,53 @@ import { Splide, SplideSlide } from "@splidejs/react-splide";
 import '@splidejs/react-splide/css';
 import { Link } from "react-router-dom";
 
-function Veggie() {
+function UserRec() { // REPLACE WITH RECOMMENDED
 
-	const [veggie, setVeggie] = useState([]);
+	const [popular, setPopular] = useState([]);
 
 	useEffect(() => {
-		getVeggie();
+		getRec();
 	}, []);
 
-	const getVeggie = async() => {
+	const getRec = async() => {
 
-		const check = localStorage.getItem('veggie');
+		const check = localStorage.getItem('popular');
 
 		if (check) {
-			setVeggie(JSON.parse(check));
+			setPopular(JSON.parse(check));
 		}
 		else {
 			const api = await fetch(
-				'http://localhost:8000/recipes/veggie'
-			); // replace with GET veggie recipes from db
+				'https://api.spoonacular.com/recipes/random?apiKey=860072773b074da38c79004d91bbdf00&number=9'
+			); // REPLACE WITH GET FROM DB?
 			const data = await api.json();
 
-			localStorage.setItem('veggie', JSON.stringify(data.recipes));
-			setVeggie(data.recipes); // recipes is an array holding objects
+			localStorage.setItem('popular', JSON.stringify(data.recipes));
+			setPopular(data.recipes); // recipes is an array holding objects
 			console.log(data.recipes);
 		}
 
 	};
-
+	
 	return (
 		<div>
 			<Wrapper>
-				<h3>Our Recommended Picks</h3>
+				<h3>Recommended</h3>
 
 				<Splide
 					options={{
-						perPage: 4,
+						perPage: 3,
 						arrows: true,
 						drag: 'free',
 						gap: '5rem',
 					}}
 				>
-					{veggie.map((recipe) => {
+					{popular.map((recipe) => {
 						return(
 							<SplideSlide key={recipe.id}>
 								<Card>
-									<Link to={'/recipe/' + recipe.id}>
+									<Link to={"/recipedb/" + recipe.id}>
 										<p>{recipe.title}</p>
-										<img src={recipe.image} alt={recipe.title} />
 										<Gradient />
 									</Link>
 								</Card>
@@ -73,6 +72,7 @@ const Card = styled.div`
 	border-radius: 2rem;
 	overflow: hidden;
 	position: relative;
+  background: #e94057;
 
 	img{
 		border-radius: 2rem;
@@ -108,4 +108,5 @@ const Gradient = styled.div`
 	background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.5));
 `;
 
-export default Veggie
+
+export default UserRec;

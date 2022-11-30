@@ -6,7 +6,7 @@ import {FaSearch} from 'react-icons/fa';
 
 import React from 'react';
 
-function Recipe() {
+function RecipeDB() {
 
   let login = useLoginContext();
   let params = useParams();
@@ -23,10 +23,14 @@ function Recipe() {
   }
 
   const fetchDetails = async () => {
+    //console.log(params.name)
     const data = await fetch(
-      'https://api.spoonacular.com/recipes/' + params.name + 
-      '/information/?apiKey=860072773b074da38c79004d91bbdf00'
-    );
+      
+      'http://localhost:8000/recipes/' + params.name, {
+        method: 'GET',
+      }
+      
+    ); // REPLACE WITH GET FROM DB
     const detailData = await data.json();
     setDetails(detailData);
     console.log(detailData);
@@ -36,12 +40,11 @@ function Recipe() {
     fetchDetails();
   }, [params.name]);
 
-  if (login.username==="") {
+  if (login.username ===""){
     return (
       <DetailWrapper>
         <div>
-          <h2>{details.title}</h2>
-          <img src={details.image} alt="" />
+          <h2>{details.name}</h2>
         </div>
         <Info>
           <Button 
@@ -55,21 +58,20 @@ function Recipe() {
             onClick={() => setActiveTab('ingredients')}
           >
             Ingredients
-          </Button>
+            </Button>
           {activeTab === 'instructions' && (
             <div>
-              <h2 dangerouslySetInnerHTML={{__html: details.summary}}></h2>
-              <h2 dangerouslySetInnerHTML={{__html: details.instructions}}></h2>
+              <h3 dangerouslySetInnerHTML={{__html: details.instructions}}></h3>
             </div>
           )}
-          {activeTab == 'ingredients' && (
+          {activeTab === 'ingredients' && (
             <ul>
-              {details.extendedIngredients.map((ingredient) => (
-                <li key={ingredient.id}>{ingredient.original}</li>
+              {details.ingredients.map((ingredient, i) => (
+                <li key={i}>{ingredient}</li>
               ))}
             </ul>
           )}
-
+          
         </Info>
       </DetailWrapper>
     );
@@ -78,8 +80,7 @@ function Recipe() {
     return (
       <DetailWrapper>
         <div>
-          <h2>{details.title}</h2>
-          <img src={details.image} alt="" />
+          <h2>{details.name}</h2>
         </div>
         <Info>
           <Button 
@@ -93,17 +94,16 @@ function Recipe() {
             onClick={() => setActiveTab('ingredients')}
           >
             Ingredients
-          </Button>
+            </Button>
           {activeTab === 'instructions' && (
             <div>
-              <h2 dangerouslySetInnerHTML={{__html: details.summary}}></h2>
-              <li dangerouslySetInnerHTML={{__html: details.instructions}}></li>
+              <h3 dangerouslySetInnerHTML={{__html: details.instructions}}></h3>
             </div>
           )}
-          {activeTab == 'ingredients' && (
+          {activeTab === 'ingredients' && (
             <ul>
-              {details.extendedIngredients.map((ingredient) => (
-                <li key={ingredient.id}>{ingredient.original}</li>
+              {details.ingredients.map((ingredient, i) => (
+                <li key={i}>{ingredient}</li>
               ))}
               <FormStyle onSubmit={submitHandler}>
                 <div>
@@ -125,7 +125,8 @@ function Recipe() {
           )}
         </Info>
       </DetailWrapper>
-  )}
+    );
+  }
 }
 
 const StyledField = styled.textarea`
@@ -198,5 +199,4 @@ const Info = styled.div`
   margin-left: 10rem;
 `;
 
-
-export default Recipe
+export default RecipeDB

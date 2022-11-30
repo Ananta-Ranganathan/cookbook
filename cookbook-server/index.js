@@ -105,9 +105,12 @@ app.get('/createuser/:username/password/:password', (req, res) => {
 app.get('/searchrecipes/:query', (req, res) => {
     MongoClient.connect(uri, (err, db) => {
         const recipes = db.db("test").collection("recipes")
-        recipes.find({$text: {$search: req.params.query}}).forEach((item) => {
-            console.log(item)
-            res.send(item)
+        var items = []
+        const cursor = recipes.find({$text: {$search: req.params.query}})
+        cursor.forEach((item) => {
+            items.push(item)
+        }).then(() => {
+            res.send(items)
         })
         // figure out how to search over the non text fields
     })

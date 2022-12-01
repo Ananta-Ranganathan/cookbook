@@ -50,7 +50,32 @@ app.get('/user/:username/recipes/:id', (req, res) => {
             if (recipe._id === mongoose.Types.ObjectId(req.params.id)) {
                 res.json(recipe)
                 found = true
-                // update internal scores for rec engine
+                for (let cuisine of user.cuisines) {
+                    if (cuisine.cuisine === recipe.cuisine) cuisine.score = cuisine.score + 1
+                }
+                if (user.time.low >= recipe.time.low) {
+                    user.time.low = recipe.time.low
+                } else if (user.time.high <= recipe.time.high) {
+                    user.time.high = recipe.time.hig
+                }
+                if (recipe.skill.easy) {
+                    user.skills.easy = user.skills.easy + 1
+                }
+                if (recipe.skill.medium) {
+                    user.skills.medium = user.skills.medium + 1
+                }
+                if (recipe.skill.hard) {
+                    user.skills.hard = user.skills.hard + 1
+                }
+                if (recipe.restrictions.vegetarian) {
+                    user.restrictions.vegetarian = user.restrictions.vegetarian + 1
+                }
+                if (recipe.restrictions.gluten_free) {
+                    user.restrictions.gluten_free = user.restrictions.gluten_free + 1
+                }
+                if (recipe.restrictions.dairy_free) {
+                    user.restrictions.dairy_free = user.restrictions.dairy_free + 1
+                }
             }
         }
         if (!found) {

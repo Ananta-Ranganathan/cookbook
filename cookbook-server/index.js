@@ -32,7 +32,7 @@ app.get('/recipes/:id', (req, res) => {
     const Recipe = mongoose.model('Recipe', recipeSchema)   
     mongoose.connect(uri)
     Recipe.findById(mongoose.Types.ObjectId(req.params.id), (err, recipe) => {
-        if (err) console.log(err)
+        if (err) throw(err)
         else {
             console.log(recipe)
             res.json(recipe)
@@ -45,6 +45,7 @@ app.get('/user/:username/recipes/:id', (req, res) => {
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
     const user = User.findOne({'username': req.params.username}, (err, user) => {
+        if (err) throw(err)
         let found = false
         for (let i = 0; i < user.customRecipes.length; i++) {
             let recipe = user.customRecipes[i]
@@ -83,7 +84,7 @@ app.get('/user/:username/recipes/:id', (req, res) => {
             const Recipe = mongoose.model('Recipe', recipeSchema)   
             mongoose.connect(uri)
             Recipe.findById(mongoose.Types.ObjectId(req.params.id), (err, recipe) => {
-                if (err) console.log(err)
+                if (err) throw(err)
                 else {
                     console.log(recipe)
                     res.json(recipe)
@@ -101,6 +102,7 @@ app.get('/user/:username/password/:password', (req, res) => {
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
     User.findOne({'username': req.params.username}, (err, user) => {
+        if (err) throw(err)
         if (user) {
             res.send(user.password === req.params.password)
         } else {
@@ -114,6 +116,7 @@ app.get('/createuser/:username/password/:password', (req, res) => {
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
     User.findOne({'username': req.params.username}, (err, user) => {
+        if (err) throw(err)
         if (user) {
             res.send(false)
         } else {
@@ -131,6 +134,7 @@ app.get('/createuser/:username/password/:password', (req, res) => {
 
 app.get('/searchrecipes/:query', (req, res) => {
     MongoClient.connect(uri, (err, db) => {
+        if (err) throw(err)
         const recipes = db.db("test").collection("recipes")
         var items = []
         const cursor = recipes.find({$text: {$search: req.params.query}})
@@ -144,6 +148,7 @@ app.get('/searchrecipes/:query', (req, res) => {
 
 app.get('/user/:username/searchrecipes/:query', (req, res) => {
     MongoClient.connect(uri, (err, db) => {
+        if (err) throw(err)
         const recipes = db.db("test").collection("recipes")
         recipes.find({$text: {$search: req.params.query}}).forEach((item) => res.send(item))
         const users = db.db("test").collection("users")

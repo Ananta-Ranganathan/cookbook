@@ -267,7 +267,6 @@ app.post('/:username', (req) => {
     const user = User.findOne({'username': req.params.username})
     if (user) {
         user.customRecipes.push(newRecipe)
-        User.deleteOne({_id: user._id})
         user.save()
     }
 })

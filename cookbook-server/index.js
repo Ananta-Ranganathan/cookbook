@@ -150,14 +150,19 @@ app.get('/user/:username/searchrecipes/:query', (req, res) => {
     MongoClient.connect(uri, (err, db) => {
         if (err) throw(err)
         const recipes = db.db("test").collection("recipes")
-        recipes.find({$text: {$search: req.params.query}}).forEach((item) => res.send(item))
-        const users = db.db("test").collection("users")
         var items = []
-        const user = users.findOne({"username": req.params.username})
-        for (let i = 0; i < user.customRecipes.length; i++) {
-            items.push(user.customRecipes[i])
-        }
-        res.send(items)
+        recipes.find({$text: {$search: req.params.query}}).forEach((item) => items.push(item))
+        const users = db.db("test").collection("users")
+        users.findOne({"username": req.params.username})
+        .then((user) => {
+            if (user) {
+                console.log(user)
+                for (let i = 0; i < user.customRecipes.length; i++) {
+                    items.push(user.customRecipes[i])
+                }
+            }
+            res.send(items)
+        })
     })
 })
 

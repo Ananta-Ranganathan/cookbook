@@ -46,7 +46,8 @@ app.get('/user/:username/recipes/:id', (req, res) => {
     mongoose.connect(uri)
     const user = User.findOne({'username': req.params.username}, (err, user) => {
         let found = false
-        for (const recipe of user.customRecipes) {
+        for (let i = 0; i < user.customRecipes.length; i++) {
+            let recipe = user.customRecipes[i]
             if (recipe._id === mongoose.Types.ObjectId(req.params.id)) {
                 res.json(recipe)
                 found = true
@@ -138,21 +139,18 @@ app.get('/searchrecipes/:query', (req, res) => {
         }).then(() => {
             res.send(items)
         })
-        // figure out how to search over the non text fields
     })
 })
 
 app.get('/user/:username/searchrecipes/:query', (req, res) => {
-    // search all the recipes (including user custom ones) for instance of text query
-    // return name for link, objectid for ref, and whether or not it is user specific
     MongoClient.connect(uri, (err, db) => {
         const recipes = db.db("test").collection("recipes")
         recipes.find({$text: {$search: req.params.query}}).forEach((item) => res.send(item))
         const users = db.db("test").collection("users")
         var items = []
         const user = users.findOne({"username": req.params.username})
-        for (const recipe of user.customRecipes) {
-            items.push(recipe)
+        for (let i = 0; i < user.customRecipes.length; i++) {
+            items.push(user.customRecipes[i])
         }
         res.send(items)
     })

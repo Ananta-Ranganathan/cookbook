@@ -171,48 +171,49 @@ app.get('/user/:username/searchrecipes/:query', (req, res) => {
 app.get('/user/:username/recommended', (req, res) => {
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
-    const user = User.findOne({'username': req.params.username})
     var scores = []
-    if (user) {
-        for (let i = 0; i < user.customRecipes.length; i++) {
-            var score = 0
-            for (let cuisine of user.cuisines) {
-                if (cuisine.cuisine === user.customRecipes[i].cuisine) {
-                    score += cuisine.score
+    User.findOne({'username': req.params.username})
+    .then((user) => {
+        if (user) {
+            for (let i = 0; i < user.customRecipes.length; i++) {
+                var score = 0
+                for (let cuisine of user.cuisines) {
+                    if (cuisine.cuisine === user.customRecipes[i].cuisine) {
+                        score += cuisine.score
+                    }
                 }
+                if (user.time.low <= user.customRecipes[i].time.low && user.time.high >= user.customRecipes[i].time.high) {
+                    score = score + 2
+                } else if (user.time.low <= user.customRecipes[i].time.low || user.time.high >= user.customRecipes[i].time.high) {
+                    score = score + 1
+                } else {
+                    score = score - 1
+                }
+                if (user.customRecipes[i].skill.easy) {
+                    score = score + user.skills.easy
+                }
+                if (user.customRecipes[i].skill.medium) {
+                    score = score + user.skills.medium
+                }
+                if (user.customRecipes[i].skill.hard) {
+                    score = score + user.skills.hard
+                }
+                if (user.customRecipes[i].restrictions.vegetarian) {
+                    score = score + user.restrictions.vegetarian
+                }
+                if (user.customRecipes[i].restrictions.gluten_free) {
+                    score = score + user.restrictions.gluten_free
+                }
+                if (user.customRecipes[i].restrictions.dairy_free) {
+                    score = score + user.skills.dairy_free
+                }
+                scores.push({score: user.customRecipes[i]._id})
             }
-            if (user.time.low <= user.customRecipes[i].time.low && user.time.high >= user.customRecipes[i].time.high) {
-                score = score + 2
-            } else if (user.time.low <= user.customRecipes[i].time.low || user.time.high >= user.customRecipes[i].time.high) {
-                score = score + 1
-            } else {
-                score = score - 1
-            }
-            if (user.customRecipes[i].skill.easy) {
-                score = score + user.skills.easy
-            }
-            if (user.customRecipes[i].skill.medium) {
-                score = score + user.skills.medium
-            }
-            if (user.customRecipes[i].skill.hard) {
-                score = score + user.skills.hard
-            }
-            if (user.customRecipes[i].restrictions.vegetarian) {
-                score = score + user.restrictions.vegetarian
-            }
-            if (user.customRecipes[i].restrictions.gluten_free) {
-                score = score + user.restrictions.gluten_free
-            }
-            if (user.customRecipes[i].restrictions.dairy_free) {
-                score = score + user.skills.dairy_free
-            }
-            scores.push({score: user.customRecipes[i]._id})
+            scores.sort((score1, score2) => { return score1 > score2})
+            scores = (scores.length < 6) ? scores.slice(0, -1) : scores.slice(0,5) 
+            res.send(scores)
         }
-        scores.sort((score1, score2) => { return score1 > score2})
-        scores = (scores.length < 6) ? scores.subarray(0, -1) : scores.subarray(0,5) 
-        res.send(scores)
-    }
-
+    })
 })
 
 // SUBSTITUTIONS
@@ -228,10 +229,12 @@ app.get('/user/:username/group/:groupnumber', (req, res) => {
     const Recipe = mongoose.model('Recipe', recipeSchema)
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
-    const user = User.findOne({'username': req.params.username})
-    if (user) {
-        res.send(user.groups[req.params.groupnumber])
-    }
+    User.findOne({'username': req.params.username})
+    .then((user) => {
+        if (user) {
+            res.send(user.groups[req.params.groupnumber])
+        }
+    })
 })
 
 // RECIPE CREATION
@@ -272,11 +275,13 @@ app.post('/:username', (req) => {
     })
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
-    const user = User.findOne({'username': req.params.username})
-    if (user) {
-        user.customRecipes.push(newRecipe)
-        user.save()
-    }
+    User.findOne({'username': req.params.username})
+    .then((user) => {
+        if (user) {
+            user.customRecipes.push(newRecipe)
+            user.save()
+        }
+    })
 })
 
 app.post('/:username/editrecipe', (req) => {
@@ -284,17 +289,19 @@ app.post('/:username/editrecipe', (req) => {
     const Recipe = mongoose.model('Recipe', recipeSchema)
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
-    const user = User.findOne({'username': req.params.username})
-    if (user) {
-        for (let i = 0; i < user.customRecipes.length; i++) {
-            if (user.customRecipes[i].name === req.body.name) {
-                user.customRecipes[i].instructions = (req.body.instructions) ? req.body.instructions : user.customRecipes[i].instructions
-                user.customRecipes[i].ingredients = (req.body.ingredients) ? req.body.ingredients : user.customRecipes[i].instructions
-                user.customRecipes[i].notes = (req.body.notes) ? req.body.notes : user.customRecipes[i].notes
-                user.save()
+    User.findOne({'username': req.params.username})
+    .then((user) => {
+        if (user) {
+            for (let i = 0; i < user.customRecipes.length; i++) {
+                if (user.customRecipes[i].name === req.body.name) {
+                    user.customRecipes[i].instructions = (req.body.instructions) ? req.body.instructions : user.customRecipes[i].instructions
+                    user.customRecipes[i].ingredients = (req.body.ingredients) ? req.body.ingredients : user.customRecipes[i].instructions
+                    user.customRecipes[i].notes = (req.body.notes) ? req.body.notes : user.customRecipes[i].notes
+                    user.save()
+                }
             }
         }
-    }
+    })
 })
 
 app.post('/user/:username/addtogroup/:groupnumber/:id', (req, res) => {
@@ -302,10 +309,12 @@ app.post('/user/:username/addtogroup/:groupnumber/:id', (req, res) => {
     const Recipe = mongoose.model('Recipe', recipeSchema)
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
-    const user = User.findOne({'username': req.params.username})
-    Recipe.findById(mongoose.Types.ObjectId(req.params.id), (recipe) => {
+    User.findOne({'username': req.params.username})
+    .then((user) => {
         if (user) {
-            user.groups[req.params.groupnumber].push(recipe)
+        Recipe.findById(mongoose.Types.ObjectId(req.params.id), (recipe) => {
+                user.groups[req.params.groupnumber].push(recipe)
+            })
         }
     })
 })

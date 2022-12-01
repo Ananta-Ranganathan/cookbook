@@ -70,6 +70,7 @@ app.get('/user/:username/recipes/:id', (req, res) => {
 // LOGIN
 
 app.get('/user/:username/password/:password', (req, res) => {
+    if (req.params.username === "" || req.params.password === "") res.send(false)
     console.log("finding user " + req.params.username + " with password attempt " + req.params.password)
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)

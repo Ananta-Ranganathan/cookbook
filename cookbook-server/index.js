@@ -140,8 +140,50 @@ app.get('/user/:username/searchrecipes/:query', (req, res) => {
 // RECOMMENDATION
 
 app.get('/user/:username/recommended', (req, res) => {
-    // use fields of user to produce score for each recipe
-    // return top n recipes
+    const User = mongoose.model('User', userSchema)   
+    mongoose.connect(uri)
+    const user = User.findOne({'username': req.params.username})
+    var scores = []
+    if (user) {
+        for (let recipe of user.customRecipes) {
+            var score = 0
+            for (let cuisine of user.cuisines) {
+                if (cuisine.cuisine === recipe.cuisine) {
+                    score += cuisine.score
+                }
+            }
+            if (user.time.low <= recipe.time.low && user.time.high >= recipe.time.high) {
+                score = score + 2
+            } else if (user.time.low <= recipe.time.low || user.time.high >= recipe.time.high) {
+                score = score + 1
+            } else {
+                score = score - 1
+            }
+            if (recipe.skill.easy) {
+                score = score + user.skills.easy
+            }
+            if (recipe.skill.medium) {
+                score = score + user.skills.medium
+            }
+            if (recipe.skill.hard) {
+                score = score + user.skills.hard
+            }
+            if (recipe.restrictions.vegetarian) {
+                score = score + user.restrictions.vegetarian
+            }
+            if (recipe.restrictions.gluten_free) {
+                score = score + user.restrictions.gluten_free
+            }
+            if (recipe.restrictions.dairy_free) {
+                score = score + user.skills.dairy_free
+            }
+            scores.push({score: recipe._id})
+        }
+        scores.sort((score1, score2) => { return score1 > score2})
+        scores = (scores.length < 6) ? scores.subarray(0, -1) : scores.subarray(0,5) 
+        res.send(scores)
+    }
+
 })
 
 // SUBSTITUTIONS
@@ -237,7 +279,7 @@ const userSchema = new mongoose.Schema({
    username: String,
    password: String,
    customRecipes: [recipeSchema],
-   cuisines: [{ String: Number }],
+   cuisines: [{ cuisine: String, score: Number }],
    time: Number,
    skills: { easy: Number, medium: Number, hard: Number },
    restrictions: { vegetarian: Number, gluten_free: Number, dairy_free: Number}

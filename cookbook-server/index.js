@@ -191,8 +191,28 @@ app.post('/:username', (req) => {
     mongoose.connect(uri)
     const user = User.findOne({'username': req.params.username})
     if (user) {
-        user.customRecipes += newRecipe
+        user.customRecipes.push(newRecipe)
+        User.deleteOne({_id: user._id})
         user.save()
+    }
+})
+
+app.post('/:username/editrecipe', (req) => {
+    console.log("user " + req.params.username + "\n" + req.body)
+    const Recipe = mongoose.model('Recipe', recipeSchema)
+    const User = mongoose.model('User', userSchema)   
+    mongoose.connect(uri)
+    const user = User.findOne({'username': req.params.username})
+    if (user) {
+        for (let recipe of user.customRecipes) {
+            if (recipe.name === req.body.name) {
+                recipe.instructions = (req.body.instructions) ? req.body.instructions : recipe.instructions
+                recipe.ingredients = (req.body.ingredients) ? req.body.ingredients : recipe.instructions
+                recipe.notes = (req.body.notes) ? req.body.notes : recipe.notes
+                User.deleteOne({_id: user._id})
+                user.save()
+            }
+        }
     }
 })
 

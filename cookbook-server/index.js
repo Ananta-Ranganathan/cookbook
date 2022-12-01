@@ -150,15 +150,11 @@ app.get('/user/:username/searchrecipes/:query', (req, res) => {
         recipes.find({$text: {$search: req.params.query}}).forEach((item) => res.send(item))
         const users = db.db("test").collection("users")
         var items = []
-        users.findOne({"username": req.params.username}, (err, user) => {
-            for (const recipe of user.customRecipes) {
-                // might have to manually check each field to find matches for query
-                items.push(recipe)
-            }
-        }).then(() => {
-            res.send(items)
-        })
-        // figure out how to search over the non text fields (maybe manually do it for each document? sounds suboptimal but may be necessary)
+        const user = users.findOne({"username": req.params.username})
+        for (const recipe of user.customRecipes) {
+            items.push(recipe)
+        }
+        res.send(items)
     })
 })
 
@@ -170,39 +166,39 @@ app.get('/user/:username/recommended', (req, res) => {
     const user = User.findOne({'username': req.params.username})
     var scores = []
     if (user) {
-        for (let recipe of user.customRecipes) {
+        for (let i = 0; i < user.customRecipes.length; i++) {
             var score = 0
             for (let cuisine of user.cuisines) {
-                if (cuisine.cuisine === recipe.cuisine) {
+                if (cuisine.cuisine === user.customRecipes[i].cuisine) {
                     score += cuisine.score
                 }
             }
-            if (user.time.low <= recipe.time.low && user.time.high >= recipe.time.high) {
+            if (user.time.low <= user.customRecipes[i].time.low && user.time.high >= user.customRecipes[i].time.high) {
                 score = score + 2
-            } else if (user.time.low <= recipe.time.low || user.time.high >= recipe.time.high) {
+            } else if (user.time.low <= user.customRecipes[i].time.low || user.time.high >= user.customRecipes[i].time.high) {
                 score = score + 1
             } else {
                 score = score - 1
             }
-            if (recipe.skill.easy) {
+            if (user.customRecipes[i].skill.easy) {
                 score = score + user.skills.easy
             }
-            if (recipe.skill.medium) {
+            if (user.customRecipes[i].skill.medium) {
                 score = score + user.skills.medium
             }
-            if (recipe.skill.hard) {
+            if (user.customRecipes[i].skill.hard) {
                 score = score + user.skills.hard
             }
-            if (recipe.restrictions.vegetarian) {
+            if (user.customRecipes[i].restrictions.vegetarian) {
                 score = score + user.restrictions.vegetarian
             }
-            if (recipe.restrictions.gluten_free) {
+            if (user.customRecipes[i].restrictions.gluten_free) {
                 score = score + user.restrictions.gluten_free
             }
-            if (recipe.restrictions.dairy_free) {
+            if (user.customRecipes[i].restrictions.dairy_free) {
                 score = score + user.skills.dairy_free
             }
-            scores.push({score: recipe._id})
+            scores.push({score: user.customRecipes[i]._id})
         }
         scores.sort((score1, score2) => { return score1 > score2})
         scores = (scores.length < 6) ? scores.subarray(0, -1) : scores.subarray(0,5) 
@@ -216,6 +212,18 @@ app.get('/user/:username/recommended', (req, res) => {
 app.get('/substitutions/:ingredient', (req, res) => {
     // search db for ingredient
     // return list of possible substitutes
+})
+
+// CATEGORIES
+
+app.get('/user/:username/group/:groupnumber', (req, res) => {
+    const Recipe = mongoose.model('Recipe', recipeSchema)
+    const User = mongoose.model('User', userSchema)   
+    mongoose.connect(uri)
+    const user = User.findOne({'username': req.params.username})
+    if (user) {
+        res.send(user.groups[req.params.groupnumber])
+    }
 })
 
 // RECIPE CREATION
@@ -271,16 +279,28 @@ app.post('/:username/editrecipe', (req) => {
     mongoose.connect(uri)
     const user = User.findOne({'username': req.params.username})
     if (user) {
-        for (let recipe of user.customRecipes) {
-            if (recipe.name === req.body.name) {
-                recipe.instructions = (req.body.instructions) ? req.body.instructions : recipe.instructions
-                recipe.ingredients = (req.body.ingredients) ? req.body.ingredients : recipe.instructions
-                recipe.notes = (req.body.notes) ? req.body.notes : recipe.notes
-                User.deleteOne({_id: user._id})
+        for (let i = 0; i < user.customRecipes.length; i++) {
+            if (user.customRecipes[i].name === req.body.name) {
+                user.customRecipes[i].instructions = (req.body.instructions) ? req.body.instructions : user.customRecipes[i].instructions
+                user.customRecipes[i].ingredients = (req.body.ingredients) ? req.body.ingredients : user.customRecipes[i].instructions
+                user.customRecipes[i].notes = (req.body.notes) ? req.body.notes : user.customRecipes[i].notes
                 user.save()
             }
         }
     }
+})
+
+app.post('/user/:username/addtogroup/:groupnumber/:id', (req, res) => {
+    console.log("user " + req.params.username + "\n" + req.body)
+    const Recipe = mongoose.model('Recipe', recipeSchema)
+    const User = mongoose.model('User', userSchema)   
+    mongoose.connect(uri)
+    const user = User.findOne({'username': req.params.username})
+    Recipe.findById(mongoose.Types.ObjectId(req.params.id), (recipe) => {
+        if (user) {
+            user.groups[req.params.groupnumber].push(recipe)
+        }
+    })
 })
 
 app.listen(port, () => {
@@ -304,6 +324,7 @@ const userSchema = new mongoose.Schema({
    username: String,
    password: String,
    customRecipes: [recipeSchema],
+   groups: [[recipeSchema]],
    cuisines: [{ cuisine: String, score: Number }],
    time: Number,
    skills: { easy: Number, medium: Number, hard: Number },

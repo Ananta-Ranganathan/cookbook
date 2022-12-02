@@ -44,7 +44,7 @@ function Searched() {
   useEffect(() => {
     let query = params.search;
     console.log(query);
-    //getSearched(query);
+    getSearched(query);
     getSearchedDB(query);
   }, [params.search]); //          every time params.search is updated
 

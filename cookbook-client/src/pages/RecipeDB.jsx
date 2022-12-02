@@ -17,6 +17,8 @@ function RecipeDB() {
   const [input, setInput] = useState("");
   const [ingredients, setIngredients] = useState();
   const [id, setId] = useState();
+  const [time, setTime] = useState("");
+  const [skill, setSkill] = useState("");
 
   const submitHandler = async(e) => {
     e.preventDefault();
@@ -54,7 +56,15 @@ function RecipeDB() {
     }
     const detailData = await data.json();
     setDetails(detailData);
-    console.log(detailData.instructions);
+    setTime("Time: " + detailData.time.low + "-" + detailData.time.high + " minutes");
+    if (detailData.skill.easy)
+      setSkill("Skill Level: Easy");
+    else if (detailData.skill.medium)
+      setSkill("Skill Level: Medium");
+    else {
+      setSkill("Skill Level: Hard");
+    }
+    console.log(detailData);
     setInstructions(detailData.instructions.map(instruction => instruction.trim()).join("\n"));
     setId(detailData._id);
   };
@@ -104,8 +114,16 @@ function RecipeDB() {
           >
             Ingredients
             </Button>
+          <Button 
+            className={activeTab==='notes' ? 'active' : ''}
+            onClick={() => setActiveTab('notes')}
+          >
+            Notes
+          </Button>
           {activeTab === 'instructions' && (
             <ul>
+              <h2>{time}</h2>
+              <h2>{skill}</h2>
               <li>{instructions}</li>
             </ul>
           )}
@@ -132,7 +150,24 @@ function RecipeDB() {
               </FormStyle>
             </ul>
           )}
-          
+          {activeTab === 'notes' && (
+            <ul>
+              <h3>Author: {details.author} </h3>
+              <h2>Cuisine type: {details.cuisine.map(cui => cui.trim()).join('/')}</h2>
+              <h2>Tags: {details.tags.map(tag => tag.trim()).join(', ')}</h2>
+              <h2>Notes: </h2>
+              <li>{details.notes}</li>
+              {details.restrictions.vegetarian === true && 
+                <li>Vegetarian</li>
+              }
+              {details.restrictions.gluten_free === true && 
+                <li>Gluten Free</li>
+              }
+              {details.restrictions.dairy_free === true && 
+                <li>Dairy Free</li>
+              }
+            </ul>
+          )}
         </Info>
       </DetailWrapper>
     );
@@ -162,11 +197,19 @@ function RecipeDB() {
             onClick={() => setActiveTab('ingredients')}
           >
             Ingredients
-            </Button>
-          {activeTab === 'instructions' && (
-            <ul>
-              <li>{instructions}</li>
-            </ul>
+          </Button>
+          <Button 
+            className={activeTab==='notes' ? 'active' : ''}
+            onClick={() => setActiveTab('notes')}
+          >
+            Notes
+          </Button>
+            {activeTab === 'instructions' && (
+              <ul>
+                <h2>{time}</h2>
+                <h2>{skill}</h2>
+                <li>{instructions}</li>
+              </ul>
           )}
           {activeTab === 'ingredients' && (
             <ul>
@@ -189,6 +232,24 @@ function RecipeDB() {
                   readOnly={true}
                 />
               </FormStyle>
+            </ul>
+          )}
+          {activeTab === 'notes' && (
+            <ul>
+              <h3>Author: {details.author} </h3>
+              <h2>Cuisine type: {details.cuisine.map(cui => cui.trim()).join('/')}</h2>
+              <h2>Tags: {details.tags.map(tag => tag.trim()).join(', ')}</h2>
+              <h2>Notes: </h2>
+              <li>{details.notes}</li>
+              {details.restrictions.vegetarian === true && 
+                <li>Vegetarian</li>
+              }
+              {details.restrictions.gluten_free === true && 
+                <li>Gluten Free</li>
+              }
+              {details.restrictions.dairy_free === true && 
+                <li>Dairy Free</li>
+              }
             </ul>
           )}
         </Info>

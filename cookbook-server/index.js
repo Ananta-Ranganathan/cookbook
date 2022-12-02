@@ -40,55 +40,58 @@ app.get('/recipes/:id', (req, res) => {
 })
 
 app.get('/user/:username/recipes/:id', (req, res) => {
-    console.log(`finding user ${req.params.username} custom version of ${req.params.recipename}`)
+    const Recipe = mongoose.model('Recipe', recipeSchema)
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
-    const user = User.findOne({'username': req.params.username}, (err, user) => {
+    User.findOne({'username': req.params.username}, (err, user) => {
         if (err) throw(err)
-        let found = false
-        for (let i = 0; i < user.customRecipes.length; i++) {
-            let recipe = user.customRecipes[i]
-            if (recipe._id === mongoose.Types.ObjectId(req.params.id)) {
-                res.json(recipe)
-                found = true
-                for (let cuisine of user.cuisines) {
-                    if (cuisine.cuisine === recipe.cuisine) cuisine.score = cuisine.score + 1
-                }
-                if (user.time.low >= recipe.time.low) {
-                    user.time.low = recipe.time.low
-                } else if (user.time.high <= recipe.time.high) {
-                    user.time.high = recipe.time.hig
-                }
-                if (recipe.skill.easy) {
-                    user.skills.easy = user.skills.easy + 1
-                }
-                if (recipe.skill.medium) {
-                    user.skills.medium = user.skills.medium + 1
-                }
-                if (recipe.skill.hard) {
-                    user.skills.hard = user.skills.hard + 1
-                }
-                if (recipe.restrictions.vegetarian) {
-                    user.restrictions.vegetarian = user.restrictions.vegetarian + 1
-                }
-                if (recipe.restrictions.gluten_free) {
-                    user.restrictions.gluten_free = user.restrictions.gluten_free + 1
-                }
-                if (recipe.restrictions.dairy_free) {
-                    user.restrictions.dairy_free = user.restrictions.dairy_free + 1
+        if (user) {
+            let foundrecipe
+            let found = false
+            for (let i = 0; i < user.customRecipes.length; i++) {
+                if (user.customRecipes[i].id == req.params.id) {
+                    found = true
+                    foundrecipe = user.customRecipes[i]
+                    res.json(user.customRecipes[i])
                 }
             }
-        }
-        if (!found) {
-            const Recipe = mongoose.model('Recipe', recipeSchema)   
-            mongoose.connect(uri)
-            Recipe.findById(mongoose.Types.ObjectId(req.params.id), (err, recipe) => {
-                if (err) throw(err)
-                else {
-                    console.log(recipe)
-                    res.json(recipe)
-                }
-            })
+            if (!found) {  
+                Recipe.findById(mongoose.Types.ObjectId(req.params.id), (err, recipe) => {
+                    if (err) throw(err)
+                    else {
+                        found = true
+                        foundrecipe = recipe
+                        res.json(recipe)
+                    }
+                })
+            }
+            // update recommendation fields based on foundrecipe
+            // for (let cuisine of user.cuisines) {
+            //         if (cuisine.cuisine === recipe.cuisine) cuisine.score = cuisine.score + 1
+            //     }
+            //     if (user.time.low >= recipe.time.low) {
+            //         user.time.low = (user.time.low + recipe.time.low) / 2
+            //     } else if (user.time.high <= recipe.time.high) {
+            //         user.time.high = (user.time.high + recipe.time.high) / 2
+            //     }
+            //     if (recipe.skill.easy) {
+            //         user.skills.easy = user.skills.easy + 1
+            //     }
+            //     if (recipe.skill.medium) {
+            //         user.skills.medium = user.skills.medium + 1
+            //     }
+            //     if (recipe.skill.hard) {
+            //         user.skills.hard = user.skills.hard + 1
+            //     }
+            //     if (recipe.restrictions.vegetarian) {
+            //         user.restrictions.vegetarian = user.restrictions.vegetarian + 1
+            //     }
+            //     if (recipe.restrictions.gluten_free) {
+            //         user.restrictions.gluten_free = user.restrictions.gluten_free + 1
+            //     }
+            //     if (recipe.restrictions.dairy_free) {
+            //         user.restrictions.dairy_free = user.restrictions.dairy_free + 1
+            //     }
         }
     })
 })
@@ -250,7 +253,7 @@ app.get('/user/:username/group/:groupnumber', (req, res) => {
     User.findOne({'username': req.params.username})
     .then((user) => {
         if (user) {
-            res.send(user.groups[req.params.groupnumber])
+            res.json(user.groups[req.params.groupnumber])
         }
     })
 })
@@ -320,6 +323,10 @@ app.post('/:username/editrecipe', (req) => {
             }
         }
     })
+})
+
+app.post('/:username/maderecipe/', (req) => {
+    
 })
 
 app.post('/user/:username/addtogroup/:groupnumber/:id', (req, res) => {

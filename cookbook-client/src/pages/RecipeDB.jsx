@@ -38,9 +38,27 @@ function RecipeDB() {
     setId(detailData._id);
   };
 
-  const updateGroup = (number) => {
-    console.log(number);
-    // API request
+  const updateGroup = async(number) => {
+    //console.log(number);
+    
+    const result = await fetch(
+      'http://localhost:8000/user/' + login.username + '/addtogroup/' + number + '/' + params.name, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(details)
+      }
+    ).then(console.log(details));
+
+    const test = await fetch(
+      'http://localhost:8000/user/' + login.username + '/group/' + number, {
+        method: 'GET'
+      }
+    );
+    console.log("TEST");
+    let testing = await test.json();
+    console.log(testing);
   }
 
   useEffect(() => {

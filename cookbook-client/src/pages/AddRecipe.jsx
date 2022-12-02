@@ -1,7 +1,9 @@
 import { React, useState, Component, useEffect } from "react";
 import styled from 'styled-components';
+import { useLoginContext } from "../LoginContext";
 
 function AddRecipe () {
+  const login = useLoginContext();
   const [addName, setName] = useState("");
   const [addAuthor, setAuthor] = useState("");
   const [addIngredients, setIngredients] = useState("");
@@ -62,6 +64,15 @@ function AddRecipe () {
       },
       body: JSON.stringify(recipedata)
     }).then(console.log(recipedata));
+    if (!(login.username==="")) {
+      fetch("http://localhost:8000/" + login.username, { // need to rename to actual endpoint later
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(recipedata)
+      }).then(console.log(recipedata));
+    }
   }
 
   return (
@@ -85,7 +96,7 @@ function AddRecipe () {
         onChange={(e) => setCuisine(e.target.value)}
       />
       <textarea type="text" name="ingredients"
-        placeholder="Ingredients - separate with commas*"
+        placeholder="Ingredients - separate with new lines*"
         value={addIngredients}
         onChange={(e) => setIngredients(e.target.value)}
       />

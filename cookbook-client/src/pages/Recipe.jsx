@@ -22,6 +22,11 @@ function Recipe() {
     setIngredients("Amen, praise the Lord");
   }
 
+  const updateGroup = (number) => {
+    console.log(number);
+    // API request
+  }
+
   const fetchDetails = async () => {
     const data = await fetch(
       'https://api.spoonacular.com/recipes/' + params.name + 
@@ -80,6 +85,12 @@ function Recipe() {
         <div>
           <h2>{details.title}</h2>
           <img src={details.image} alt="" />
+          <Grid>
+            <AddButton onClick={() => updateGroup(0)}>Add to Group 1</AddButton>
+            <AddButton onClick={() => updateGroup(1)}>Add to Group 2</AddButton>
+            <AddButton onClick={() => updateGroup(2)}>Add to Group 3</AddButton>
+            <AddButton onClick={() => updateGroup(3)}>Add to Group 4</AddButton>
+          </Grid>
         </div>
         <Info>
           <Button 
@@ -127,6 +138,29 @@ function Recipe() {
       </DetailWrapper>
   )}
 }
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+`;
+
+const AddButton = styled.button`
+  display: flex;
+  text-decoration: none;
+  font-size: 1.5rem;
+  width: 25%;
+  height: 8rem;
+  padding: 1rem;
+  justify-content: center;
+  align-items: center;
+  border-radius: 2rem;
+  background: linear-gradient(35deg, #494949, #313131);
+  color: white;
+  cursor: pointer;
+  &:hover {
+    background: #e94057;
+  }
+`;
 
 const StyledField = styled.textarea`
   margin: 1rem 0rem;

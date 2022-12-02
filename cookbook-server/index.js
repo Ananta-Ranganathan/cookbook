@@ -315,9 +315,11 @@ app.post('/user/:username/addtogroup/:groupnumber/:id', (req, res) => {
         Recipe.findById(mongoose.Types.ObjectId(req.params.id), (recipe) => {
                 if (user.groups[req.params.groupnumber]) {
                     (user.groups[req.params.groupnumber]).push(recipe)
+                    user.save()
                     res.send(true)
                 } else {
                     (user.groups[req.params.groupnumber]) = recipe
+                    user.save()
                     res.send(true)
                 }
             })

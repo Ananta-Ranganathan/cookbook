@@ -217,19 +217,18 @@ app.get('/user/:username/recommended', (req, res) => {
 
 // SUBSTITUTIONS
 app.get('/substitutions/:ingredient', (req, res) => {
-    //connect to database, find an ingredient to find substitutes for as input,
-    //find list of substitutions also in database or create them, return array of substitutes
-    /*mongoose.connect(uri)
-    const Sub = mongoose.model('Recipe', substitutionSchema)
-    var substitutes = []
-    const ingredient = db.db("test").find("ingredients")
-    const selected = ingredient.find({$text: {$search: req.params.ingredient}}) //i is selected ingredient
-    selected.forEach((substitute) => {
-        substitutes.push(substitute)
-    }).then(() => {
-        res.send(substitutes)
-    })*/
-    
+    const Substitution = mongoose.model('Substitution', substitutionSchema) 
+    mongoose.connect(uri)
+    Substitution.findOne({'ingredient': req.params.ingredient})
+    .then((substitution) => {
+        if (substitution) {
+            console.log(substitution)
+            res.send(substitution.substitutes)
+        } else {
+            console.log('not found')
+            res.send([])
+        }
+    })
 })
 
 // CATEGORIES
@@ -377,6 +376,7 @@ const userSchema = new mongoose.Schema({
    restrictions: { vegetarian: Number, gluten_free: Number, dairy_free: Number}
 });
 
-const substitutesSchema = new mongoose.Schema({
-    substitutesMap: [{ingredient: String, substitutes: String}]
+const substitutionSchema = new mongoose.Schema({
+    ingredient: String,
+    substitutes: String
 });

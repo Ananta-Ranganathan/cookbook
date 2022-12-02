@@ -307,25 +307,32 @@ app.post('/:username/editrecipe', (req) => {
 app.post('/user/:username/addtogroup/:groupnumber/:id', (req, res) => {
     console.log("user " + req.params.username + " group " + req.params.groupnumber + " id " + req.params.id)
     const Recipe = mongoose.model('Recipe', recipeSchema)
-    const User = mongoose.model('User', userSchema)   
+    const newRecipe = new Recipe({
+        name: req.body.name,
+        author: req.body.author,
+        ingredients: req.body.ingredients,
+        instructions: req.body.instructions,
+        cuisine: req.body.cuisine,
+        notes: req.body.notes,
+        tags: req.body.tags,
+        time: req.body.time,
+        skill: req.body.skill,
+        restrictions: req.body.restrictions
+    })
+    const User = mongoose.model('User', userSchema)
     mongoose.connect(uri)
     User.findOne({'username': req.params.username})
     .then((user) => {
         if (user) {
-        Recipe.findById(mongoose.Types.ObjectId(req.params.id), (recipe) => {
-                if (user.groups[req.params.groupnumber]) {
-                    console.log(recipe)
-                    (user.groups[req.params.groupnumber]).push(recipe)
-                    user.save()
-                    res.send(true)
-                } else {
-                    (user.groups[req.params.groupnumber]) = recipe
-                    console.log("new")
-                    console.log(recipe)
-                    user.save()
-                    res.send(true)
-                }
-            })
+            if (user.groups[req.params.groupnumber]) {
+                (user.groups[req.params.groupnumber]).push(newRecipe)
+                user.save()
+                res.send(true)
+            } else {
+                (user.groups[req.params.groupnumber]) = newRecipe
+                user.save()
+                res.send(true)
+            }
         }
         else {
             res.send(false)
@@ -356,7 +363,7 @@ const userSchema = new mongoose.Schema({
    customRecipes: [recipeSchema],
    groups: [[recipeSchema]],
    cuisines: [{ cuisine: String, score: Number }],
-   time: Number,
+   time: { low: Number, high: Number },
    skills: { easy: Number, medium: Number, hard: Number },
    restrictions: { vegetarian: Number, gluten_free: Number, dairy_free: Number}
 });

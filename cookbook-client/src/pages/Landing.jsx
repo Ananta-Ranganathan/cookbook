@@ -3,25 +3,17 @@ import Popular from "../components/Popular";
 import { useContext } from "react";
 import { LoginContext, useLoginContext } from "../LoginContext";
 import React from 'react'
+import UserRec from "../components/UserRec";
 
 function Landing() {
   let login = useLoginContext();
 
-  if (login.username === "") {
-    return (
-      <div>
-        <Popular />
-        <Veggie />
-      </div>
-    )
-  }
-  else {
-    return (
-      <div>
-        <Popular />
-      </div>
-    )
-  }
+  return (
+    <div>
+      <Popular />
+      <UserRec />
+    </div>
+  )
 }
 
 export default Landing;

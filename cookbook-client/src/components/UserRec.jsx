@@ -3,9 +3,11 @@ import styled from "styled-components";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import '@splidejs/react-splide/css';
 import { Link } from "react-router-dom";
+import { useLoginContext } from "../LoginContext";
 
 function UserRec() { // REPLACE WITH RECOMMENDED
 
+  let login = useLoginContext();
 	const [popular, setPopular] = useState([]);
 
 	useEffect(() => {
@@ -13,29 +15,30 @@ function UserRec() { // REPLACE WITH RECOMMENDED
 	}, []);
 
 	const getRec = async() => {
+    if (login.username==="") {
+      const api = await fetch(
+        'https://api.spoonacular.com/recipes/random?apiKey=860072773b074da38c79004d91bbdf00&number=9'
+      ); // REPLACE WITH GET FROM DB?
+      const data = await api.json();
 
-		const check = localStorage.getItem('popular');
-
-		if (check) {
-			setPopular(JSON.parse(check));
-		}
-		else {
-			const api = await fetch(
-				'https://api.spoonacular.com/recipes/random?apiKey=860072773b074da38c79004d91bbdf00&number=9'
-			); // REPLACE WITH GET FROM DB?
-			const data = await api.json();
-
-			localStorage.setItem('popular', JSON.stringify(data.recipes));
-			setPopular(data.recipes); // recipes is an array holding objects
-			console.log(data.recipes);
-		}
-
+      localStorage.setItem('popular', JSON.stringify(data.recipes));
+      setPopular(data.recipes); // recipes is an array holding objects
+      console.log(data.recipes);
+    }
+    else {
+      const result = await fetch(
+        'http://localhost:8000/user/' + login.username + '/recommended'
+      );
+      const data = await result.json();
+      console.log(data);
+      //setPopular(data
+    }
 	};
 	
 	return (
 		<div>
 			<Wrapper>
-				<h3>Recommended</h3>
+				<h3>Recommended for You</h3>
 
 				<Splide
 					options={{

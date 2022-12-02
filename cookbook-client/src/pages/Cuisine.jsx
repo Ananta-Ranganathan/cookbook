@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import {motion} from 'framer-motion';
 import {Link, useParams} from 'react-router-dom';
+import { useLoginContext } from "../LoginContext";
 
 function Cuisine() {
 
+  let login = useLoginContext();
   const [cuisine, setCuisine] = useState([]);
-  let params = useParams();
+  let {name} = useParams();
   
+  /*
   const getCuisine = async (name) => {
     const data = await fetch(
       'https://api.spoonacular.com/recipes/complexSearch?apiKey=860072773b074da38c79004d91bbdf00&cuisine=italian'
@@ -16,25 +19,45 @@ function Cuisine() {
     console.log(recipes);
     setCuisine(recipes.results);
   };
+  */
+
+  const getCollection = async (name) => {
+    const data = await fetch(
+      'http://localhost:8000/user/' + login.username + '/group/' + name
+    );
+    console.log(data);
+    const recipes = await data.json();
+    console.log(recipes);
+    setCuisine(recipes);
+  }
 
   useEffect (() => {
-    //getCuisine(params.type);
-    console.log(params.type);
-  }, [params.type]);
+    getCollection(name);
+    console.log(name);
+  }, [name]);
 
-  return <Grid>
-    {cuisine.map((item) => {
-      return(
-        <Card key={item.id}>
-          <Link to={'/recipe/' + item.id}>
-            <img src={item.image} alt="" />
-            <h4>{item.title}</h4>
-          </Link>
-        </Card>
-      )
-    })}
-  </Grid>;
+  return (
+    <div>
+    <Grid>
+      {cuisine.map((item) => {
+        return (
+          <CardDB key={item._id}>
+            <Link to={'/recipedb/' + item._id}>
+              <h4>{item.name}</h4>
+            </Link>
+          </CardDB>
+        )
+      })}
+    </Grid>
+    </div>
+  );
 }
+
+/*
+
+        
+    
+    */
 
 const Grid = styled.div`
   display: grid;
@@ -42,11 +65,8 @@ const Grid = styled.div`
   grid-gap: 3rem;
 `;
 
-const Card = styled.div`
-  img {
-    width: 100%;
-    border-radius: 2rem;
-  }
+const CardDB = styled.div`
+  background: BlanchedAlmond;
   a {
     text-decoration: none;
   }

@@ -5,7 +5,7 @@ function CreateUser() {
 
   const [addName, setName] = useState("");
   const [addPass, setPass] = useState("");
-  const [addStatus, setStatus] = useState("");
+  //const [addStatus, setStatus] = useState("");
   
   const handleSubmit = async(e) => {
     e.preventDefault();
@@ -14,7 +14,7 @@ function CreateUser() {
       password: addPass,
     };
 
-    console.log(createInfo);
+    //console.log(createInfo);
     const result = await fetch (
       'http://localhost:8000/createuser/' + createInfo.username + '/password/' + createInfo.password, {
         method: 'GET',
@@ -22,10 +22,12 @@ function CreateUser() {
     );
 
     if (result === true) {
-      setStatus("Successfully created user. Please nagivate to home page")
+      //setStatus("Successfully created user. Please nagivate to home page")
+      console.log("Successfully created user");
     }
     else {
-      setStatus("Failure: Username already taken")
+      //setStatus("Failure: Username already taken")
+      console.log("Failed to create user");
     }
   };
 
@@ -43,7 +45,6 @@ function CreateUser() {
         onChange={(e) => setPass(e.target.value)}
       />
       <button type="button" onClick={handleSubmit}>Submit</button>
-      <h3>{addStatus}</h3>
     </StyledField>
   );
 };

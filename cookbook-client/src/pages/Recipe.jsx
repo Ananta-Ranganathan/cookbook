@@ -15,12 +15,23 @@ function Recipe() {
   const [input, setInput] = useState("");
   const [ingredients, setIngredients] = useState("");
 
-  const submitHandler = (e) => {
+  const submitHandler = async(e) => {
     e.preventDefault();
     // API REQUEST
-    console.log("Search requested");
-    setIngredients("Amen, praise the Lord");
-  }
+    const result = await fetch(
+      'http://localhost:8000/substitutions/' + input
+    );
+
+    const data = await result.json();
+    console.log(result);
+    if (data.options === "") {
+      setIngredients("Sorry, substitute unavailable.");
+    }
+    else {
+      setIngredients(data.options);
+    }
+    console.log(data.options);
+  };
 
   const fetchDetails = async () => {
     const data = await fetch(
@@ -67,6 +78,22 @@ function Recipe() {
               {details.extendedIngredients.map((ingredient) => (
                 <li key={ingredient.id}>{ingredient.original}</li>
               ))}
+              <FormStyle onSubmit={submitHandler}>
+                <div>
+                  <FaSearch />
+                  <input
+                    onChange={(e) => setInput(e.target.value)}
+                    type="text"
+                    placeholder="Search for a replacement ingredient:"
+                    value={input}
+                  /> 
+                </div>
+                <StyledField type="text" name="ingredients"
+                  placeholder="Replacement ingredients:"
+                  value={ingredients}
+                  readOnly={true}
+                />
+              </FormStyle>
             </ul>
           )}
 

@@ -8,16 +8,16 @@ function Category() {
     <Wrapper>
       <h3>Your Collections</h3>
       <List>
-        <SLink to={'/cuisine/Italian'}>
+        <SLink to={'/cuisine/0'}>
           <RiNumber1 size={50} />
         </SLink>
-        <SLink to={'/cuisine/American'}>
+        <SLink to={'/cuisine/1'}>
           <RiNumber2 size={50} />
         </SLink>
-        <SLink to={'/cuisine/Thai'}>
+        <SLink to={'/cuisine/2'}>
           <RiNumber3 size={50} />
         </SLink>
-        <SLink to={'/cuisine/Japanese'}>
+        <SLink to={'/cuisine/3'}>
           <RiNumber4 size={50} />
         </SLink>
       </List>

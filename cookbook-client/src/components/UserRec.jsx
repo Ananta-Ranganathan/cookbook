@@ -9,6 +9,7 @@ function UserRec() { // REPLACE WITH RECOMMENDED
 
   let login = useLoginContext();
 	const [popular, setPopular] = useState([]);
+  const [isSpoon, setSpoon] = useState(true);
 
 	useEffect(() => {
 		getRec();
@@ -24,48 +25,105 @@ function UserRec() { // REPLACE WITH RECOMMENDED
       localStorage.setItem('popular', JSON.stringify(data.recipes));
       setPopular(data.recipes); // recipes is an array holding objects
       console.log(data.recipes);
+      setSpoon(true);
     }
     else {
       const result = await fetch(
         'http://localhost:8000/user/' + login.username + '/recommended'
       );
       const data = await result.json();
-      console.log(data);
-      //setPopular(data
+      //console.log(data);
+      setPopular(data)
+      setSpoon(false);
+      console.log("YES")
+      popular.map((recipe) => {
+        console.log(recipe);
+      })
     }
 	};
 	
-	return (
-		<div>
-			<Wrapper>
-				<h3>Recommended for You</h3>
+  if (isSpoon) {
+    return (
+      <div>
+        <Wrapper>
+          <h3>Popular Picks</h3>
 
-				<Splide
-					options={{
-						perPage: 3,
-						arrows: true,
-						drag: 'free',
-						gap: '5rem',
-					}}
-				>
-					{popular.map((recipe) => {
-						return(
-							<SplideSlide key={recipe.id}>
-								<Card>
-									<Link to={"/recipedb/" + recipe.id}>
-										<p>{recipe.title}</p>
-										<Gradient />
-									</Link>
-								</Card>
-							</SplideSlide>
-						);
-					})}
-				</Splide>
-			</Wrapper>
-		</div>
-	);
+          <Splide
+            options={{
+              perPage: 3,
+              arrows: true,
+              drag: 'free',
+              gap: '5rem',
+            }}
+          >
+            {popular.map((recipe) => {
+              return(
+                <SplideSlide key={recipe.id}>
+                  <Card>
+                    <Link to={"/recipe/" + recipe.id}>
+                      <p>{recipe.title}</p>
+                      <img src={recipe.image} alt={recipe.title} />
+                      <Gradient />
+                    </Link>
+                  </Card>
+                </SplideSlide>
+              );
+            })}
+          </Splide>
+        </Wrapper>
+      </div>
+    );
+  }
+  else {
+    return (
+      <div>
+        <Wrapper>
+          <h3>Recommended for You</h3>
+
+          <Splide
+            options={{
+              perPage: 3,
+              arrows: true,
+              drag: 'free',
+              gap: '5rem',
+            }}
+          >
+            {popular.map((item) => {
+              return(
+                <SplideSlide key={item.recipe._id}>
+                  <Card>
+                    <Link to={"/recipedb/" + item.recipe._id}>
+                      <p>{item.recipe.name}</p>
+                      <Gradient />
+                    </Link>
+                  </Card>
+                </SplideSlide>
+              );
+            })}
+          </Splide>
+        </Wrapper>
+      </div>
+    );
+  }
 }
 
+/*
+
+
+            {popular.map((recipe) => {
+              return(
+                <SplideSlide key={recipe._id}>
+                  <Card>
+                    <Link to={"/recipedb/" + recipe._id}>
+                      <p>{recipe.name}</p>
+                      <Gradient />
+                    </Link>
+                  </Card>
+                </SplideSlide>
+              );
+            })}
+
+            */
 const Wrapper = styled.div`
 	margin: 4rem 0rem;
 `;

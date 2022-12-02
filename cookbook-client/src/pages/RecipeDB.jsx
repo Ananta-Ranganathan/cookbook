@@ -10,39 +10,59 @@ import React from 'react';
 function RecipeDB() {
 
   let login = useLoginContext();
-  let params = useParams();
+  let { name } = useParams();
   const [details, setDetails] = useState({});
+  const [instructions, setInstructions] = useState("");
   const [activeTab, setActiveTab] = useState("instructions");
   const [input, setInput] = useState("");
   const [ingredients, setIngredients] = useState();
   const [id, setId] = useState();
 
-  const submitHandler = (e) => {
+  const submitHandler = async(e) => {
     e.preventDefault();
     // API REQUEST
-    console.log("Search requested");
-    setIngredients("Amen, praise the Lord");
+    const result = await fetch(
+      'http://localhost:8000/substitutions/' + input
+    );
+
+    const data = await result.json();
+    console.log(result);
+    if (data.options === "") {
+      setIngredients("Sorry, substitute unavailable.");
+    }
+    else {
+      setIngredients(data.options);
+    }
+    console.log(data.options);
   }
 
   const fetchDetails = async () => {
-    //console.log(params.name)
-    const data = await fetch(
-      
-      'http://localhost:8000/recipes/' + params.name, {
-        method: 'GET',
-      }
-      
-    ); // REPLACE WITH GET FROM DB
+    let data = {};
+    if (login.username === "") {
+      data = await fetch(
+        'http://localhost:8000/recipes/' + name, {
+          method: 'GET',
+        }
+      ); // REPLACE WITH GET FROM DB
+    }
+    else {
+      data = await fetch(
+        'http://localhost:8000/user/' + login.username + '/recipes/' + name, {
+          method: 'GET',
+        }
+      );
+    }
     const detailData = await data.json();
     setDetails(detailData);
+    console.log(detailData.instructions);
+    setInstructions(detailData.instructions.map(instruction => instruction.trim()).join("\n"));
     setId(detailData._id);
   };
 
   const updateGroup = async(number) => {
-    //console.log(number);
     
     const result = await fetch(
-      'http://localhost:8000/user/' + login.username + '/addtogroup/' + number + '/' + params.name, {
+      'http://localhost:8000/user/' + login.username + '/addtogroup/' + number + '/' + name, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,19 +71,19 @@ function RecipeDB() {
       }
     ).then(console.log(details));
 
+    /*
     const test = await fetch(
       'http://localhost:8000/user/' + login.username + '/group/' + number, {
         method: 'GET'
       }
     );
-    console.log("TEST");
     let testing = await test.json();
-    console.log(testing);
+    */
   }
 
   useEffect(() => {
     fetchDetails();
-  }, [params.name]);
+  }, [name]);
 
   if (login.username ===""){
     return (
@@ -86,7 +106,7 @@ function RecipeDB() {
             </Button>
           {activeTab === 'instructions' && (
             <ul>
-              <li dangerouslySetInnerHTML={{__html: details.instructions}}></li>
+              <li>{instructions}</li>
             </ul>
           )}
           {activeTab === 'ingredients' && (
@@ -94,6 +114,22 @@ function RecipeDB() {
               {details.ingredients.map((ingredient, i) => (
                 <li key={i}>{ingredient}</li>
               ))}
+              <FormStyle onSubmit={submitHandler}>
+                <div>
+                  <FaSearch />
+                  <input
+                    onChange={(e) => setInput(e.target.value)}
+                    type="text"
+                    placeholder="Search for a replacement ingredient:"
+                    value={input}
+                  /> 
+                </div>
+                <StyledField type="text" name="ingredients"
+                  placeholder="Replacement ingredients:"
+                  value={ingredients}
+                  readOnly={true}
+                />
+              </FormStyle>
             </ul>
           )}
           
@@ -129,7 +165,7 @@ function RecipeDB() {
             </Button>
           {activeTab === 'instructions' && (
             <ul>
-              <li dangerouslySetInnerHTML={{__html: details.instructions}}></li>
+              <li>{instructions}</li>
             </ul>
           )}
           {activeTab === 'ingredients' && (
@@ -180,8 +216,13 @@ const EditButton = styled(Link)`
 `;
 
 const Grid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  padding: 1rem 0rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  svg {
+    font-size: 2rem;
+  }
 `;
 
 const AddButton = styled.button`
@@ -210,7 +251,7 @@ const StyledField = styled.textarea`
   padding: 1rem 1rem;
   border: none;
   border-radius: 1rem;
-  font-size: 1rem;
+  font-size: 1.5rem;
 `;
 
 const FormStyle = styled.form`

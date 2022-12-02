@@ -17,7 +17,7 @@ function Pages() {
     return (
         <Routes>
             <Route path='/' element={<Landing />} /> 
-            <Route path="/cuisine/:type" element={<Cuisine />} />
+            <Route path="/cuisine/:name" element={<Cuisine />} />
             <Route path="/searched/:search" element={<Searched />} />
             <Route path="/recipe/:name" element={<Recipe />} />
             <Route path="/addrecipe/" element={<AddRecipe />} />

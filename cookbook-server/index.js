@@ -20,7 +20,6 @@ const uri = process.env.MONGODB_URI
 
 const port = process.env.PORT || 8000
 
-
 app.get('/', (req, res) => {
     res.send('cookbook server');
 })
@@ -217,10 +216,20 @@ app.get('/user/:username/recommended', (req, res) => {
 })
 
 // SUBSTITUTIONS
-
 app.get('/substitutions/:ingredient', (req, res) => {
-    // search db for ingredient
-    // return list of possible substitutes
+    //connect to database, find an ingredient to find substitutes for as input,
+    //find list of substitutions also in database or create them, return array of substitutes
+    /*mongoose.connect(uri)
+    const Sub = mongoose.model('Recipe', substitutionSchema)
+    var substitutes = []
+    const ingredient = db.db("test").find("ingredients")
+    const selected = ingredient.find({$text: {$search: req.params.ingredient}}) //i is selected ingredient
+    selected.forEach((substitute) => {
+        substitutes.push(substitute)
+    }).then(() => {
+        res.send(substitutes)
+    })*/
+    
 })
 
 // CATEGORIES
@@ -354,4 +363,8 @@ const userSchema = new mongoose.Schema({
    time: Number,
    skills: { easy: Number, medium: Number, hard: Number },
    restrictions: { vegetarian: Number, gluten_free: Number, dairy_free: Number}
+});
+
+const substitutesSchema = new mongoose.Schema({
+    substitutesMap: [{ingredient: String, substitutes: String}]
 });

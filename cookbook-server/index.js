@@ -205,6 +205,7 @@ app.get('/user/:username/recommended', (req, res) => {
 })
 
 // SUBSTITUTIONS
+//substitutions added to db and testing works
 app.get('/substitutions/:ingredient', (req, res) => {
     const Substitution = mongoose.model('Ingredient', substitutionSchema) 
     mongoose.connect(uri)

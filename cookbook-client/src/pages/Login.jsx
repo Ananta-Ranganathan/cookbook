@@ -8,7 +8,6 @@ function Login() {
   const [addName, setName] = useState("");
   const [addPass, setPass] = useState("");
   const [trueName, setTrueName] = useState("");
-  const [addStatus, setStatus] = useState("");
 
   const login = useLoginContext();
   
@@ -21,21 +20,19 @@ function Login() {
 
     //console.log(loginInfo);
     const result = await fetch (
-
       'http://localhost:8000/user/' + loginInfo.username + '/password/' + loginInfo.password, {
         method: 'GET',
       }
-
     );
 
     if (result) // login API endpoint returns true
     {
       login.changeUser(loginInfo.username);
-      setStatus("Successful login. Please nagivate to home page");
+      console.log("Success");
     }
     else
     {
-      setStatus("Unsuccessful login");
+      console.log("Failure");
     }
   };
 
@@ -54,7 +51,6 @@ function Login() {
         onChange={(e) => setPass(e.target.value)}
       />
       <button type="button" onClick={handleSubmit}>Submit</button>
-      <h3>{addStatus}</h3>
     </StyledField>
   );
 };

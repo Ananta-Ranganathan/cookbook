@@ -8,6 +8,7 @@ import AddRecipe from './AddRecipe';
 import Login from './Login';
 import CreateUser from './CreateUser';
 import RecipeDB from "./RecipeDB";
+import EditRecipe from './EditRecipe';
 
 
 // different element is displayed based on which path is active (default '/')
@@ -23,6 +24,7 @@ function Pages() {
             <Route path="/login/" element={<Login />} />
             <Route path="/createuser/" element={<CreateUser />} />
             <Route path="/recipedb/:name" element={<RecipeDB />} />
+            <Route path="/editrecipe/:name" element={<EditRecipe />} />
         </Routes>
     );
 }

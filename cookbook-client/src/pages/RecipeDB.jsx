@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { useParams } from "react-router-dom";
 import { useLoginContext } from "../LoginContext";
 import {FaSearch} from 'react-icons/fa';
+import {BrowserRouter, Link} from 'react-router-dom';
 
 import React from 'react';
 
@@ -13,7 +14,8 @@ function RecipeDB() {
   const [details, setDetails] = useState({});
   const [activeTab, setActiveTab] = useState("instructions");
   const [input, setInput] = useState("");
-  const [ingredients, setIngredients] = useState("");
+  const [ingredients, setIngredients] = useState();
+  const [id, setId] = useState();
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -33,8 +35,13 @@ function RecipeDB() {
     ); // REPLACE WITH GET FROM DB
     const detailData = await data.json();
     setDetails(detailData);
-    console.log(detailData);
+    setId(detailData._id);
   };
+
+  const updateGroup = (number) => {
+    console.log(number);
+    // API request
+  }
 
   useEffect(() => {
     fetchDetails();
@@ -44,7 +51,7 @@ function RecipeDB() {
     return (
       <DetailWrapper>
         <div>
-          <h2>{details.name}</h2>
+          <h3>{details.name}</h3>
         </div>
         <Info>
           <Button 
@@ -60,9 +67,9 @@ function RecipeDB() {
             Ingredients
             </Button>
           {activeTab === 'instructions' && (
-            <div>
-              <h3 dangerouslySetInnerHTML={{__html: details.instructions}}></h3>
-            </div>
+            <ul>
+              <li dangerouslySetInnerHTML={{__html: details.instructions}}></li>
+            </ul>
           )}
           {activeTab === 'ingredients' && (
             <ul>
@@ -80,7 +87,14 @@ function RecipeDB() {
     return (
       <DetailWrapper>
         <div>
-          <h2>{details.name}</h2>
+          <h3>{details.name}</h3>
+          <Grid>
+            <AddButton onClick={() => updateGroup(0)}>Add to Group 1</AddButton>
+            <AddButton onClick={() => updateGroup(1)}>Add to Group 2</AddButton>
+            <AddButton onClick={() => updateGroup(2)}>Add to Group 3</AddButton>
+            <AddButton onClick={() => updateGroup(3)}>Add to Group 4</AddButton>
+          </Grid>
+          <EditButton to={'/editrecipe/' + id}>Edit Recipe</EditButton>
         </div>
         <Info>
           <Button 
@@ -96,9 +110,9 @@ function RecipeDB() {
             Ingredients
             </Button>
           {activeTab === 'instructions' && (
-            <div>
-              <h3 dangerouslySetInnerHTML={{__html: details.instructions}}></h3>
-            </div>
+            <ul>
+              <li dangerouslySetInnerHTML={{__html: details.instructions}}></li>
+            </ul>
           )}
           {activeTab === 'ingredients' && (
             <ul>
@@ -128,6 +142,47 @@ function RecipeDB() {
     );
   }
 }
+
+const EditButton = styled(Link)`
+  display: flex;
+  text-decoration: none;
+  font-size: 3rem;
+  width: 100%;
+  height: 8rem;
+  padding: 1rem;
+  justify-content: center;
+  align-items: center;
+  border-radius: 2rem;
+  background: linear-gradient(35deg, #494949, #313131);
+  color: white;
+  cursor: pointer;
+  &:hover {
+    background: #e94057;
+  }
+`;
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+`;
+
+const AddButton = styled.button`
+  display: flex;
+  text-decoration: none;
+  font-size: 1.5rem;
+  width: 25%;
+  height: 8rem;
+  padding: 1rem;
+  justify-content: center;
+  align-items: center;
+  border-radius: 2rem;
+  background: linear-gradient(35deg, #494949, #313131);
+  color: white;
+  cursor: pointer;
+  &:hover {
+    background: #e94057;
+  }
+`;
 
 const StyledField = styled.textarea`
   margin: 1rem 0rem;

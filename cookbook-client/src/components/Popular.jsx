@@ -21,7 +21,7 @@ function Popular() { // REPLACE WITH RECOMMENDED
 		}
 		else {
 			const api = await fetch(
-				'https://api.spoonacular.com/recipes/random?apiKey=860072773b074da38c79004d91bbdf00&number=9'
+				'https://api.spoonacular.com/recipes/random?apiKey=5815fa810a994a868df0392def7934bc&number=9'
 			); // REPLACE WITH GET FROM DB?
 			const data = await api.json();
 

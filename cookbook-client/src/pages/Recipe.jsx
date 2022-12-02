@@ -22,11 +22,6 @@ function Recipe() {
     setIngredients("Amen, praise the Lord");
   }
 
-  const updateGroup = (number) => {
-    console.log(number);
-    // API request
-  }
-
   const fetchDetails = async () => {
     const data = await fetch(
       'https://api.spoonacular.com/recipes/' + params.name + 
@@ -85,12 +80,6 @@ function Recipe() {
         <div>
           <h2>{details.title}</h2>
           <img src={details.image} alt="" />
-          <Grid>
-            <AddButton onClick={() => updateGroup(0)}>Add to Group 1</AddButton>
-            <AddButton onClick={() => updateGroup(1)}>Add to Group 2</AddButton>
-            <AddButton onClick={() => updateGroup(2)}>Add to Group 3</AddButton>
-            <AddButton onClick={() => updateGroup(3)}>Add to Group 4</AddButton>
-          </Grid>
         </div>
         <Info>
           <Button 

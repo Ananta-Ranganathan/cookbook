@@ -231,22 +231,6 @@ app.get('/substitutions/:ingredient', (req, res) => {
     })
 })
 
-// SUBSTITUTIONS
-app.get('/substitutions/:ingredient', (req, res) => {
-    //connect to database, find an ingredient to find substitutes for as input,
-    //find list of substitutions also in database or create them, return array of substitutes
-    mongoose.connect(uri)
-    const Sub = mongoose.model('Substitutions', substitutesSchema)
-    Sub.findOne({'ingredient': req.params.ingredient})
-    //var substitutes = []
-    if (substitution) {
-        res.send(substitute.substitutes)
-    }
-    else {
-        res.send([])
-    }
-})
-
 // CATEGORIES
 
 app.get('/user/:username/group/:groupnumber', (req, res) => {

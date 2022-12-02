@@ -305,7 +305,7 @@ app.post('/:username/editrecipe', (req) => {
 })
 
 app.post('/user/:username/addtogroup/:groupnumber/:id', (req, res) => {
-    console.log("user " + req.params.username + "\n" + req.body)
+    console.log("user " + req.params.username + " group " + req.params.groupnumber + " id " + req.params.id)
     const Recipe = mongoose.model('Recipe', recipeSchema)
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
@@ -314,11 +314,14 @@ app.post('/user/:username/addtogroup/:groupnumber/:id', (req, res) => {
         if (user) {
         Recipe.findById(mongoose.Types.ObjectId(req.params.id), (recipe) => {
                 if (user.groups[req.params.groupnumber]) {
+                    console.log(recipe)
                     (user.groups[req.params.groupnumber]).push(recipe)
                     user.save()
                     res.send(true)
                 } else {
                     (user.groups[req.params.groupnumber]) = recipe
+                    console.log("new")
+                    console.log(recipe)
                     user.save()
                     res.send(true)
                 }

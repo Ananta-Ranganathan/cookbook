@@ -122,6 +122,12 @@ app.get('/createuser/:username/password/:password', (req, res) => {
             const newUser = new User({
                 username: req.params.username,
                 password: req.params.password,
+                customRecipes: [],
+                groups: [[]],
+                cuisines: [],
+                time: { low: 0, high: 100 },
+                skills: { easy: 0, medium: 0, hard: 0 },
+                restrictions: { vegetarian: 0, gluten_free: 0, dairy_free: 0}
             })
             newUser.save()
             res.send(true)
@@ -135,7 +141,7 @@ app.get('/searchrecipes/:query', (req, res) => {
     MongoClient.connect(uri, (err, db) => {
         if (err) throw(err)
         const recipes = db.db("test").collection("recipes")
-        var items = []
+        let items = []
         const cursor = recipes.find({$text: {$search: req.params.query}})
         cursor.forEach((item) => {
             items.push(item)
@@ -149,7 +155,7 @@ app.get('/user/:username/searchrecipes/:query', (req, res) => {
     MongoClient.connect(uri, (err, db) => {
         if (err) throw(err)
         const recipes = db.db("test").collection("recipes")
-        var items = []
+        let items = []
         recipes.find({$text: {$search: req.params.query}}).forEach((item) => items.push(item))
         const users = db.db("test").collection("users")
         users.findOne({"username": req.params.username})
@@ -168,48 +174,31 @@ app.get('/user/:username/searchrecipes/:query', (req, res) => {
 // RECOMMENDATION
 
 app.get('/user/:username/recommended', (req, res) => {
+    const Recipe = mongoose.model('Recipe', recipeSchema)
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
-    var scores = []
+    let scores = [{}]
     User.findOne({'username': req.params.username})
     .then((user) => {
         if (user) {
+            // custom recipes
             for (let i = 0; i < user.customRecipes.length; i++) {
-                var score = 0
-                for (let cuisine of user.cuisines) {
-                    if (cuisine.cuisine === user.customRecipes[i].cuisine) {
-                        score += cuisine.score
-                    }
+                let score = 0
+                let current = user.customRecipes[i]
+                for (let j = 0; j < user.cuisines.length; j++) {
+                    if (current.cuisine.includes(user.cuisines[i].cuisine)) score += user.cuisines[i].score
                 }
-                if (user.time.low <= user.customRecipes[i].time.low && user.time.high >= user.customRecipes[i].time.high) {
-                    score = score + 2
-                } else if (user.time.low <= user.customRecipes[i].time.low || user.time.high >= user.customRecipes[i].time.high) {
-                    score = score + 1
-                } else {
-                    score = score - 1
-                }
-                if (user.customRecipes[i].skill.easy) {
-                    score = score + user.skills.easy
-                }
-                if (user.customRecipes[i].skill.medium) {
-                    score = score + user.skills.medium
-                }
-                if (user.customRecipes[i].skill.hard) {
-                    score = score + user.skills.hard
-                }
-                if (user.customRecipes[i].restrictions.vegetarian) {
-                    score = score + user.restrictions.vegetarian
-                }
-                if (user.customRecipes[i].restrictions.gluten_free) {
-                    score = score + user.restrictions.gluten_free
-                }
-                if (user.customRecipes[i].restrictions.dairy_free) {
-                    score = score + user.skills.dairy_free
-                }
-                scores.push({score: user.customRecipes[i]._id})
+                score += (current.time.low >= user.time.low)
+                score += (current.time.high <= user.time.high)
+                score += current.skill.easy * user.skills.easy
+                score += current.skill.medium * user.skills.medium
+                score += current.skill.hard * user.skills.hard
+                score += current.restrictions.vegetarian * user.restrictions.vegetarian
+                score += current.restrictions.gluten_free * user.restrictions.gluten_free
+                score += current.restrictions.dairy_free * user.restrictions.dairy_free
+                scores.push({'score': score, "recipe": current})
             }
-            scores.sort((score1, score2) => { return score1 > score2})
-            scores = (scores.length < 6) ? scores.slice(0, -1) : scores.slice(0,5) 
+
             res.send(scores)
         }
     })
@@ -217,16 +206,15 @@ app.get('/user/:username/recommended', (req, res) => {
 
 // SUBSTITUTIONS
 app.get('/substitutions/:ingredient', (req, res) => {
-    const Substitution = mongoose.model('Substitution', substitutionSchema) 
+    const Substitution = mongoose.model('Ingredient', substitutionSchema) 
     mongoose.connect(uri)
     Substitution.findOne({'ingredient': req.params.ingredient})
     .then((substitution) => {
         if (substitution) {
             console.log(substitution)
-            res.send(substitution.substitutes)
+            res.json({'options': substitution.substitutes})
         } else {
             console.log('not found')
-            res.send([])
         }
     })
 })

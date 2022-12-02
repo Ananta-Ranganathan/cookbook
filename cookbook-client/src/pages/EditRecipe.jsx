@@ -37,7 +37,7 @@ function EditRecipe() {
     fetchDetails();
   }, [params.name]);
 
-  const handleSubmit = e => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     const recipedata = {
       name: details.name,
@@ -53,15 +53,14 @@ function EditRecipe() {
     };
 
     console.log(recipedata);
-    /*
-    fetch("http://localhost:8000/", { // need to rename to actual endpoint later
+    
+    await fetch("http://localhost:8000/" + login.username + '/editrecipe', { // need to rename to actual endpoint later
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(recipedata)
     }).then(console.log(recipedata));
-    */
   }
 /*
   return(

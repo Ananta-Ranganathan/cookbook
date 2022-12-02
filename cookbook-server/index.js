@@ -207,15 +207,16 @@ app.get('/user/:username/recommended', (req, res) => {
 // SUBSTITUTIONS
 //substitutions added to db and testing works
 app.get('/substitutions/:ingredient', (req, res) => {
+    let query = req.params.ingredient.toLowerCase()
     const Substitution = mongoose.model('Ingredient', substitutionSchema) 
     mongoose.connect(uri)
-    Substitution.findOne({'ingredient': req.params.ingredient})
+    Substitution.findOne({'ingredient': query})
     .then((substitution) => {
         if (substitution) {
             console.log(substitution)
             res.json({'options': substitution.substitutes})
         } else {
-            console.log('not found')
+            res.json({'options': ''})
         }
     })
 })
@@ -369,3 +370,15 @@ const substitutionSchema = new mongoose.Schema({
     ingredient: String,
     substitutes: String
 });
+
+
+// script to make all substitutions lowercase
+// const Substitution = mongoose.model('Ingredient', substitutionSchema) 
+// mongoose.connect(uri)
+// Substitution.find({}, (err, e) => {
+//     e.map(val => {
+//     val.ingredient = val.ingredient.toLowerCase()
+//     val.substitutes = val.substitutes.toLowerCase()
+//     val.save()
+//     })
+// })

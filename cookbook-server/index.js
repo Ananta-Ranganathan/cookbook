@@ -177,7 +177,7 @@ app.get('/user/:username/recommended', (req, res) => {
     const Recipe = mongoose.model('Recipe', recipeSchema)
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
-    let scores = [{}]
+    let scores = []
     User.findOne({'username': req.params.username})
     .then((user) => {
         if (user) {
@@ -186,7 +186,7 @@ app.get('/user/:username/recommended', (req, res) => {
                 let score = 0
                 let current = user.customRecipes[i]
                 for (let j = 0; j < user.cuisines.length; j++) {
-                    if (current.cuisine.includes(user.cuisines[i].cuisine)) score += user.cuisines[i].score
+                    if (current.cuisine.includes(user.cuisines[j].cuisine)) score += user.cuisines[j].score
                 }
                 score += (current.time.low >= user.time.low)
                 score += (current.time.high <= user.time.high)
@@ -198,8 +198,28 @@ app.get('/user/:username/recommended', (req, res) => {
                 score += current.restrictions.dairy_free * user.restrictions.dairy_free
                 scores.push({'score': score, "recipe": current})
             }
-
-            res.send(scores)
+            // general recipes
+            Recipe.find({})
+            .then((recipelist) => {
+                recipelist.map(current => {
+                    let score = 0
+                    for (let j = 0; j < user.cuisines.length; j++) {
+                        if (current.cuisine.includes(user.cuisines[j].cuisine)) score += user.cuisines[j].score
+                    }
+                    score += (current.time.low >= user.time.low)
+                    score += (current.time.high <= user.time.high)
+                    score += current.skill.easy * user.skills.easy
+                    score += current.skill.medium * user.skills.medium
+                    score += current.skill.hard * user.skills.hard
+                    score += current.restrictions.vegetarian * user.restrictions.vegetarian
+                    score += current.restrictions.gluten_free * user.restrictions.gluten_free
+                    score += current.restrictions.dairy_free * user.restrictions.dairy_free
+                    scores.push({'score': score, "recipe": current})
+                })
+            })
+            .then(() => {
+                res.send(scores)
+            })
         }
     })
 })

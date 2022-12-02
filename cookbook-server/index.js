@@ -50,48 +50,104 @@ app.get('/user/:username/recipes/:id', (req, res) => {
             let found = false
             for (let i = 0; i < user.customRecipes.length; i++) {
                 if (user.customRecipes[i].id == req.params.id) {
+                    console.log("found custom")
                     found = true
                     foundrecipe = user.customRecipes[i]
                     res.json(user.customRecipes[i])
+                    // update recommendation fields
+                    for (let recipecuisine of foundrecipe.cuisine) {
+                        let foundcuisine = false
+                        for (let i = 0; i < user.cuisines.length; i++) {
+                            if (user.cuisines[i].cuisine === recipecuisine) {
+                                user.cuisines[i].score++
+                                foundcuisine = true
+                            }
+                        }
+                        if (!foundcuisine) {
+                            user.cuisines.push(
+                                {
+                                    cuisine: recipecuisine,
+                                    score: 1
+                                }
+                            )
+                        }
+                    }
+                    if (user.time.low >= foundrecipe.time.low) {
+                        user.time.low = (user.time.low + foundrecipe.time.low) / 2
+                    } else if (user.time.high <= foundrecipe.time.high) {
+                        user.time.high = (user.time.high + foundrecipe.time.high) / 2
+                    }
+                    if (foundrecipe.skill.easy) {
+                        user.skills.easy++
+                    }
+                    if (foundrecipe.skill.medium) {
+                        user.skills.medium++
+                    }
+                    if (foundrecipe.skill.hard) {
+                        user.skills.hard++
+                    }
+                    if (foundrecipe.restrictions.vegetarian) {
+                        user.restrictions.vegetarian++
+                    }
+                    if (foundrecipe.restrictions.gluten_free) {
+                        user.restrictions.gluten_free++
+                    }
+                    if (foundrecipe.restrictions.dairy_free) {
+                        user.restrictions.dairy_free++
+                    }
+                    user.save()
                 }
             }
             if (!found) {  
-                Recipe.findById(mongoose.Types.ObjectId(req.params.id), (err, recipe) => {
-                    if (err) throw(err)
-                    else {
-                        found = true
-                        foundrecipe = recipe
-                        res.json(recipe)
+                Recipe.findById(mongoose.Types.ObjectId(req.params.id))
+                .then((recipe) => {
+                    found = true
+                    foundrecipe = recipe
+                    // update recommendation fields
+                    for (let recipecuisine of foundrecipe.cuisine) {
+                        let foundcuisine = false
+                        for (let i = 0; i < user.cuisines.length; i++) {
+                            if (user.cuisines[i].cuisine === recipecuisine) {
+                                user.cuisines[i].score++
+                                foundcuisine = true
+                            }
+                        }
+                        if (!foundcuisine) {
+                            user.cuisines.push(
+                                {
+                                    cuisine: recipecuisine,
+                                    score: 1
+                                }
+                            )
+                        }
                     }
+                    if (user.time.low >= foundrecipe.time.low) {
+                        user.time.low = (user.time.low + foundrecipe.time.low) / 2
+                    } else if (user.time.high <= foundrecipe.time.high) {
+                        user.time.high = (user.time.high + foundrecipe.time.high) / 2
+                    }
+                    if (foundrecipe.skill.easy) {
+                        user.skills.easy++
+                    }
+                    if (foundrecipe.skill.medium) {
+                        user.skills.medium++
+                    }
+                    if (foundrecipe.skill.hard) {
+                        user.skills.hard++
+                    }
+                    if (foundrecipe.restrictions.vegetarian) {
+                        user.restrictions.vegetarian++
+                    }
+                    if (foundrecipe.restrictions.gluten_free) {
+                        user.restrictions.gluten_free++
+                    }
+                    if (foundrecipe.restrictions.dairy_free) {
+                        user.restrictions.dairy_free++
+                    }
+                    user.save()
+                    res.json(foundrecipe)
                 })
             }
-            // update recommendation fields based on foundrecipe
-            // for (let cuisine of user.cuisines) {
-            //         if (cuisine.cuisine === recipe.cuisine) cuisine.score = cuisine.score + 1
-            //     }
-            //     if (user.time.low >= recipe.time.low) {
-            //         user.time.low = (user.time.low + recipe.time.low) / 2
-            //     } else if (user.time.high <= recipe.time.high) {
-            //         user.time.high = (user.time.high + recipe.time.high) / 2
-            //     }
-            //     if (recipe.skill.easy) {
-            //         user.skills.easy = user.skills.easy + 1
-            //     }
-            //     if (recipe.skill.medium) {
-            //         user.skills.medium = user.skills.medium + 1
-            //     }
-            //     if (recipe.skill.hard) {
-            //         user.skills.hard = user.skills.hard + 1
-            //     }
-            //     if (recipe.restrictions.vegetarian) {
-            //         user.restrictions.vegetarian = user.restrictions.vegetarian + 1
-            //     }
-            //     if (recipe.restrictions.gluten_free) {
-            //         user.restrictions.gluten_free = user.restrictions.gluten_free + 1
-            //     }
-            //     if (recipe.restrictions.dairy_free) {
-            //         user.restrictions.dairy_free = user.restrictions.dairy_free + 1
-            //     }
         }
     })
 })
@@ -157,19 +213,52 @@ app.get('/searchrecipes/:query', (req, res) => {
 app.get('/user/:username/searchrecipes/:query', (req, res) => {
     MongoClient.connect(uri, (err, db) => {
         if (err) throw(err)
+        let query = req.params.query
         const recipes = db.db("test").collection("recipes")
         let items = []
-        recipes.find({$text: {$search: req.params.query}}).forEach((item) => items.push(item))
+        let seen = []
         const users = db.db("test").collection("users")
         users.findOne({"username": req.params.username})
         .then((user) => {
             if (user) {
                 console.log(user)
                 for (let i = 0; i < user.customRecipes.length; i++) {
-                    items.push(user.customRecipes[i])
+                    // check for match
+                    let current = user.customRecipes[i]
+                    let valid = false
+                    if (current.name.includes(query) || current.author.includes(query) || current.cuisine.includes(query) || current.restrictions.query) {
+                        valid = true
+                    }
+                    for (let ingredient of current.ingredients) {
+                        if (ingredient.includes(query)) {
+                            valid = true
+                        }
+                    }
+                    for (let instruction of current.instructions) {
+                        if (instruction.includes(query)) {
+                            valid = true
+                        }
+                    }
+                    for (let tag of current.tags) {
+                        if (tag.includes(query)) {
+                            valid = true
+                        }
+                    }
+                    if (valid) {
+                        items.push(current)
+                        seen.push(current.name)
+                    }
                 }
             }
-            res.send(items)
+        })
+        .then(() => {
+            recipes.find({$text: {$search: query}}).forEach((item) => {
+                console.log(item)
+                if (!seen.includes(item.name)) items.push(item)
+            })
+            .then(() => {
+                res.json(items)
+            })
         })
     })
 })
@@ -247,7 +336,6 @@ app.get('/substitutions/:ingredient', (req, res) => {
 // CATEGORIES
 
 app.get('/user/:username/group/:groupnumber', (req, res) => {
-    const Recipe = mongoose.model('Recipe', recipeSchema)
     const User = mongoose.model('User', userSchema)   
     mongoose.connect(uri)
     User.findOne({'username': req.params.username})
@@ -397,6 +485,13 @@ const substitutionSchema = new mongoose.Schema({
     ingredient: String,
     substitutes: String
 });
+
+function updateRecommendeds(user, foundrecipe) {
+    console.log(`updating recommendations for ${user}`)
+    // update recommendation fields based on foundrecipe
+    console.log(foundrecipe)
+
+}
 
 
 // script to make all substitutions lowercase
